@@ -3,7 +3,6 @@
 # AuthUserFile /etc/httpd/htpasswd
 # Require valid-user
 
-
-RewriteEngine On
-RewriteBase /
-RewriteRule api/(.*) api.php
+# RewriteEngine On
+# RewriteBase /
+# RewriteRule api/(.*) api.php
