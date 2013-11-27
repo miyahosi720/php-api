@@ -5,7 +5,10 @@
     'path'         =>  $_SERVER['REQUEST_URI'],
     'ip_address'   =>  $_SERVER['REMOTE_ADDR'],
     'user_agent'   =>  $_SERVER['HTTP_USER_AGENT'],
-    'japanese'     =>  'リラックマ',
+    'parent'       =>  array(
+      'japanese' => 'リラックマ',
+      'array'    => array('element1', 'element2', 'element3')
+    ),
     'timestamp'    =>  time()
   );
 
