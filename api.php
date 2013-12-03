@@ -5,10 +5,10 @@
   $response = array();
 
   switch ($_SERVER['REQUEST_URI']) {
-    case '/api/hello':
+    case '/y-api/hello':
       $response['data'] = 'world';
       break;
-    case '/api/item':
+    case '/y-api/item':
       $response['data'] = array(
         'id'          => 100,
         'title'       => 'やばい商品',
@@ -16,7 +16,18 @@
         'description' => 'これはまじでやばい'
       );
       break;
+
+    case '/y-api/items':
+      $response['item'];
+
+      break;
+
+    default:
+        //エラーとエラーコード、エラーメッセージ（リクエストは成功している）
+
+      break;
   }
 
+  var_dump($response);
   echo json_encode($response);
 ?>

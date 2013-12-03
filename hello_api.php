@@ -12,5 +12,7 @@
     'timestamp'    =>  time()
   );
 
+  var_dump($arr);
+
   echo json_encode($arr);
 ?>

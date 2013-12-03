@@ -3,9 +3,9 @@
 # AuthUserFile /etc/httpd/htpasswd
 # Require valid-user
 
-# RewriteEngine On
-# RewriteBase /
-# RewriteRule api/(.*) api.php
+RewriteEngine On
+RewriteBase /
+RewriteRule y-api/(.*) api.php
 # RewriteRule api/(.*) api2.php
 
 ErrorDocument 404 /404.html
