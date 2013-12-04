@@ -5,7 +5,10 @@
 
 RewriteEngine On
 RewriteBase /
-RewriteRule y-api/(.*) api.php
-# RewriteRule api/(.*) api2.php
+# RewriteRule y-api/(.*) api.php
+RewriteRule y-api/(.*) y-api.php
 
 ErrorDocument 404 /404.html
+
+# RewriteRule違うかも 
+# http://php-api.miyahosi720.com/y-api/y-api.php/items?price_min=1000&Price_max=2000
