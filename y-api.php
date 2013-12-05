@@ -6,18 +6,55 @@ header("Content-Type: application/json; charset=utf-8");
 
 $response = array();
 
-$pos = strpos($_SERVER['REQUEST_URI'], '?');
 
-$base_url = substr($_SERVER['REQUEST_URI'], 0, $pos);
+$request_uri = $_SERVER['REQUEST_URI'];
 
-var_dump($_SERVER['REQUEST_URI']);
+var_dump($request_uri);
+
+$base_url = substr($request_uri, 10); // /y-api/v1/を切り出し
+
 var_dump($base_url);
 
-switch ($base_url) {
+if ($base_url === false) { 
+    // /y-api/v1/の場合
+    echo '/y-api/v1/です';
+    exit;
+} else {
 
-    case '/y-api/items/search':
+    //urlに?が含まれていたら、?より前の箇所を抜き出す
+    if (false !== $pos = strpos($base_url, '?')) {
+        $core_url = substr($base_url, 0, $pos);
+    } else {
+        $core_url = $base_url;
+    }
+}
 
-        echo '/y-api/items/searchだよ';
+var_dump($core_url);
+
+$pieces = explode(".", $core_url);
+$action = $pieces[0];
+$format = $pieces[1];
+
+if (count($pieces) != 2) {
+    //core_urlに含まれるドットが1つではない、エラー
+    echo 'ドットが1つじゃないよ';
+    exit;
+} elseif ($format == 'json') {
+    //json形式のフラグを設定
+    $format_json = 1;
+} elseif ($format == 'xml') {
+    //xml形式のフラグを設定
+    $format_xml = 1;
+} else {
+    echo '.json（または.xml）直後がおかしい';
+    exit;
+}
+
+switch ($action) {
+
+    case 'SearchItems':
+
+        echo 'SearchItemsだよ';
 
         //GETだったら
         var_dump($_GET);
@@ -56,13 +93,15 @@ switch ($base_url) {
         //GET以外のメソッドだったら→エラー
     break;
 
-    case '/y-api/item/view':
+    case 'LookUpItem':
 
-        echo '/y-api/item/viewだよ';
+        echo 'LookUpItemだよ';
 
     break;
 
     default:
+        echo '.json（または.xml）直前がおかしい';
+        exit;
         //エラーとエラーコード、エラーメッセージ（リクエストは成功している）
         $request['error'] = array (
             'message' => 'Bad Request',

@@ -6,7 +6,7 @@
 RewriteEngine On
 RewriteBase /
 # RewriteRule y-api/(.*) api.php
-RewriteRule y-api/(.*) y-api.php
+RewriteRule y-api/v1/(.*) y-api.php
 
 ErrorDocument 404 /404.html
 
