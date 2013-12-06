@@ -1,11 +1,11 @@
 <?php
 
 require('search.php');
+require('validate.php');
 
 header("Content-Type: application/json; charset=utf-8");
 
 $response = array();
-
 
 $request_uri = $_SERVER['REQUEST_URI'];
 
@@ -56,23 +56,29 @@ switch ($action) {
 
         echo 'SearchItemsだよ';
 
-        //GETだったら
-        var_dump($_GET);
+        //GETじゃなかったら
+        if ($_SERVER['REQUEST_METHOD'] != 'GET') {
+            echo 'GET以外のメソッドです';
+            exit;
+        }
 
-        $selected_category_id = $_GET['category_id'];
-        $price_min = $_GET['price_min'];
-        $price_max = $_GET['price_max'];
-        $selected_sort = $_GET['sort'];
-        $count_per_page = $_GET['count_per_page'];
-        $page_number = $_GET['page_number'];
-        //validation
+        $params = $_GET;
+var_dump($params);
+        //validate GET Parameters
         //count_per_page, page_numberどちらかしかセットされていなかったらエラー
         //エラーはtry〜catch?
+
+        $val = new validate();
+
+        $result = $val->validateGetParams($params);
+var_dump($result);
+exit;
+
 
         $search = new Search();
 
         //カテゴリID、最低最高価格で限定してCSVからパース
-        $parsed_ret = $search->parseCSV(null, null, 2000);
+        $parsed_ret = $search->pickUpRecordsFromCsv(null, null, 2000);
         //echo json_encode($parsed_ret);
         
         //ソート
