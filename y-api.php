@@ -1,124 +1,145 @@
 <?php
-
 require('search.php');
 require('validate.php');
-
-header("Content-Type: application/json; charset=utf-8");
-
-$response = array();
+require('uri.php');
 
 $request_uri = $_SERVER['REQUEST_URI'];
 
+//var_dump($_SERVER['SERVER_NAME']);
 //var_dump($request_uri);
 
-$base_url = substr($request_uri, 10); // /y-api/v1/を切り出し
+$response = array();
 
-//var_dump($base_url);
-
-if ($base_url === false) { 
-    // /y-api/v1/の場合 404
-    echo '/y-api/v1/です';
-    exit;
-} else {
-
-    //urlに?が含まれていたら、?より前の箇所を抜き出す
-    if (false !== $pos = strpos($base_url, '?')) {
-        $core_url = substr($base_url, 0, $pos);
-    } else {
-        $core_url = $base_url;
+try {
+    //リクエストメソッドがGETかをチェック
+    if ($_SERVER['REQUEST_METHOD'] != 'GET') {
+        //GET以外のメソッド
+        //405 Method Not Allowed
+        throw new MethodNotAllowdException('GET以外のメソッドです');
     }
-}
 
-//var_dump($core_url);
+    //"/y-api/v1/SearchItems.json" のようなURIについて、SearchItemsをaction, jsonをformatと呼ぶ。
+    //REQUEST_URIの形式チェックを行うと同時に、action, formatの抽出を行う
+    $uri = new Uri();
+    $requested = $uri->extractRequestedActionAndFormat($request_uri);
 
-$pieces = explode(".", $core_url);
-$action = $pieces[0];
-$format = $pieces[1];
+    if ($requested === false) {
+        //urlが間違っている
+        //404 Not Found
+        throw new NotFoundException('urlの形式が不正です');
+    }
 
-if (count($pieces) != 2) {
-    //core_urlに含まれるドットが1つではない、エラー 404
-    echo 'ドットが1つじゃないよ';
-    exit;
-} elseif ($format == 'json') {
-    //json形式のフラグを設定
-    $format_json = 1;
-} elseif ($format == 'xml') {
-    //xml形式のフラグを設定
-    $format_xml = 1;
-} else {
-    echo '.json（または.xml）以外の形式'; //404
-    exit;
-}
+    $action = $requested['action'];
+    $format = $requested['format'];
 
-switch ($action) {
+    //APIの種類(action)ごとに処理を書く
+    switch ($action) {
 
-    case 'SearchItems':
+        case 'SearchItems':
 
-        echo 'SearchItemsだよ　';
+            $req_params = $_GET;
 
-        //GETじゃなかったら
-        if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-            echo 'GET以外のメソッドです'; //405 Method Not Allowed
-            exit;
-        }
+            //GETパラメーターのバリデーション    
+            $val = new validate();
+            $params = $val->validateGetParams($req_params);
 
-        $params = $_GET;
-//var_dump($params);
 
-        //validate GET Parameters
-        //エラーはtry〜catch?
-        
-        $val = new validate();
+            if ($params === false) {
+                //GETのパラメーターが間違っている
+                //400 Bad Request
+                throw new BadRequestException('GETのパラメーターが間違っています');
+            }
 
-        $result = $val->validateGetParams($params);
-var_dump($result);
+            //CSVから商品を検索
+            $search = new Search();
+            //カテゴリID、価格範囲に合うレコードを取得
+            $picked_items = $search->pickUpRecordsFromCsv($params['category_id'], $params['price_min'], $params['price_max']);
 
-        if (!$result) {
-            echo 'GETのパラメーターが間違っている'; //400
-            exit;
-        }
+            //ソート
+            $sorted_items = $search->sort($picked_items, $params['sort']);
 
-        $search = new Search();
+            //ページネーション
+            $paginated_items = $search->pagination($sorted_items, $params['count_per_page'], $params['page_number']);
 
-        //カテゴリID、最低最高価格で限定してCSVからパース
-        $parsed_ret = $search->pickUpRecordsFromCsv(null, null, 2000);
-        //echo json_encode($parsed_ret);
-        
-        //ソート
-        //ソート条件がないときはそもそもこの行を実行しないのがいい
-        $sorted_ret = $search->sort($parsed_ret, 'price_desc');
-        echo json_encode($sorted_ret);
-        
-        //ページネーション
-        //$paginated_ret = $search->pagination($sorted_ret, $count_per_page, $page_number);
-        $paginated_ret = $search->pagination($sorted_ret, 4, 3);
-        //echo json_encode($paginated_ret);
-/*
-        $response['item'] = $items;
-        $response['item_count'] = $item_count;
-        $response['timestamp'] = time();
-*/
+            $item = $paginated_items;
+//var_dump($item);
+            if (is_array($item)) {
+                $item_count = count($item);
 
-        //GET以外のメソッドだったら→エラー
-    break;
+            } else {
+                //返り値が配列ではない
+                // 500 Internal Server Error
+                throw new InternalServerErrorException ('返り値が不正');
+            }
 
-    case 'LookUpItem':
+        break;
 
-        echo 'LookUpItemだよ';
+        case 'LookUpItem':
 
-    break;
+//echo 'LookUpItemだよ';
 
-    default:
-        echo '.json（または.xml）直前がおかしい';
-        exit;
-        //エラーとエラーコード、エラーメッセージ（リクエストは成功している）
-        $request['error'] = array (
-            'message' => 'Bad Request',
-            'code' => '400'
+        break;
+
+        default:
+            //404 NOT FOUND
+            throw new NotFoundException('そのようなAPIのアクションはありません');
+        break;
+    } //switch終了
+
+    $response['item'] = $item;
+    $response['item_count'] = $item_count;
+    $response['requested_url'] = 'http://' . $_SERVER['SERVER_NAME'] . $request_uri;
+    $response['timestamp'] = time();
+
+} catch (BadRequestException $e) {
+    //400 Bad Request
+    header("HTTP/1.1 400 Bad Request");
+    $response['error'] = array(
+        'code' => '400',
+        'message' => 'Bad Request'
+    );
+} catch (NotFoundException $e) {
+    //404 NOT FOUND
+    header("HTTP/1.1 404 Not Found");
+    $response['error'] = array(
+            'code' => '404',
+            'message' => 'The URL You Requested Was Not Found'
         );
-
-    break;
+} catch (MethodNotAllowdException $e) {
+    //405 Method Not Allowed
+    header("HTTP/1.1 405 Method Not Allowed");
+    $response['error'] = array(
+            'code' => '405',
+            'message' => 'Method Not Allowed'
+        );
+} catch (InternalServerErrorException $e) {
+    // 500 Internal Server Error
+    header("HTTP/1.1 500 Internal Server Error");
+    $response['error'] = array(
+            'code' => '500',
+            'message' => 'Server Error'
+        );
 }
 
-//echo json_encode($response);
+class NotFoundException extends Exception {}
+
+class MethodNotAllowdException extends Exception {}
+
+class BadRequestException extends Exception {}
+
+class InternalServerErrorException extends Exception {}
+
+//var_dump($response);
+//var_dump($format);
+
+if ($format == 'xml') {
+    header("Content-Type: text/xml; charset=utf-8");
+    //xml形式で出力
+    echo 'aaa';
+} else {
+    header("Content-Type: application/json; charset=utf-8");
+    echo json_encode($response);
+}
+
+
 ?>

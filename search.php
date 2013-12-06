@@ -12,7 +12,7 @@ class Search
     /*
      * CSVのデータのうち、条件に該当するレコードをパースして配列として返す
      */
-    public function parseCSV($selected_category_id, $price_min = null, $price_max = null)
+    public function pickUpRecordsFromCsv($selected_category_id = '', $price_min = '', $price_max = '')
     {
         $file = 'item.csv';
         $source = trim(file_get_contents($file));
@@ -23,9 +23,9 @@ class Search
         foreach ($records as $record) {
             list($product_id, $category_id, $title, $price) = explode(",", $record);
 
-            $price_in_range = $this->isPriceInRange($price, $price_min, $price_max);
-
             $category_selected = $this->isCategorySelected($category_id, $selected_category_id);
+
+            $price_in_range = $this->isPriceInRange($price, $price_min, $price_max);
 
             if ($price_in_range && $category_selected) {
                 $item['product_id'] = $product_id;
@@ -45,9 +45,9 @@ class Search
     /*
      * $priceが$price_min以上、$price_max以下ならばtrue, それ以外はfalseを返す
      */
-    private function isPriceInRange($price, $price_min, $price_max)
+    private function isPriceInRange($price, $price_min = '', $price_max = '')
     {
-        if ((!empty($price_min) && $price < $price_min) || (!empty($price_max) && $price_max < $price)) {
+        if ((!empty($price_min) && (int)$price < (int)$price_min) || (!empty($price_max) && (int)$price_max < (int)$price)) {
             return false;
         }
 
@@ -57,16 +57,16 @@ class Search
     /*
      * $category_idが$selected_category_idと一致していればtrue, それ以外はfalseを返す
      */
-    private function isCategorySelected($category_id, $selected_category_id)
+    private function isCategorySelected($category_id, $selected_category_id = '')
     {
-        if (!empty($selected_category_id) && $category_id != $selected_category_id) {
+        if (!empty($selected_category_id) && (int)$category_id != (int)$selected_category_id) {
             return false;
         }
 
         return true;
     }
 
-    public function sort($items, $selected_sort)
+    public function sort($items, $selected_sort = '')
     {
         if (!empty($selected_sort)) {
             switch ($selected_sort) {
@@ -118,16 +118,16 @@ class Search
         return $a['product_id'] - $b['product_id'];
     }
 
-    public function pagination($items, $count_per_page, $page_number)
+    public function pagination($items, $count_per_page = '', $page_number = '')
     {
         if (!empty($count_per_page) && !empty($page_number)) {
             $offset = $count_per_page * ($page_number - 1);
             $limit = $count_per_page;
 
-            $paginated_items = array_slice($items, $offset, $limit);
+            $items = array_slice($items, $offset, $limit);
         }
 
-        return $paginated_items;
+        return $items;
     }
 
 

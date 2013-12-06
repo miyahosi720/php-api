@@ -2,13 +2,10 @@
 
 class Validate
 {
-    public function validateGetParams($params)
+    public function validateGetParams($req_params)
     {
-        $result = array();
-        $error = array();
-
         //不必要なパラメーターチェック
-        foreach ($params as $key => $value) {
+        foreach ($req_params as $key => $value) {
             switch ($key) {
                 case 'category_id' :
                 case 'price_min':
@@ -24,12 +21,12 @@ class Validate
             }
         }
 
-        $category_id = isset($params['category_id']) ? trim($params['category_id']) : '';
-        $price_min = isset($params['price_min']) ? trim($params['price_min']) : '';
-        $price_max = isset($params['price_max']) ? trim($params['price_max']) : '';
-        $sort = isset($params['sort']) ? trim($params['sort']) : '';
-        $count_per_page = isset($params['count_per_page']) ? trim($params['count_per_page']) : '';
-        $page_number = isset($params['page_number']) ? trim($params['page_number']) : '';
+        $category_id = isset($req_params['category_id']) ? trim($req_params['category_id']) : '';
+        $price_min = isset($req_params['price_min']) ? trim($req_params['price_min']) : '';
+        $price_max = isset($req_params['price_max']) ? trim($req_params['price_max']) : '';
+        $sort = isset($req_params['sort']) ? trim($req_params['sort']) : '';
+        $count_per_page = isset($req_params['count_per_page']) ? trim($req_params['count_per_page']) : '';
+        $page_number = isset($req_params['page_number']) ? trim($req_params['page_number']) : '';
 
         //category_id
         if (!empty($category_id)) {
@@ -110,7 +107,16 @@ class Validate
             }
         }
 
-        return true;
+        $params = array(
+                'category_id' => $category_id,
+                'price_min' => $price_min,
+                'price_max' => $price_max,
+                'sort' => $sort,
+                'count_per_page' => $count_per_page,
+                'page_number' => $page_number
+            );
+
+        return $params;
     }
 
     //値が自然数かどうかをチェックする
