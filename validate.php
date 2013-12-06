@@ -18,7 +18,8 @@ class Validate
                 case 'page_number':
                     break;
                 default :
-                    $error['params'] = '不必要なパラメーターが入っています';
+                    //不必要なパラメーターが入っている
+                    return false;
                     break;
             }
         }
@@ -30,11 +31,11 @@ class Validate
         $count_per_page = isset($params['count_per_page']) ? trim($params['count_per_page']) : '';
         $page_number = isset($params['page_number']) ? trim($params['page_number']) : '';
 
-
         //category_id
         if (!empty($category_id)) {
             if (!$this->isNaturalNumber($category_id)) {
-                $error['category_id'] = 'category_idに自然数以外の値が入っています';
+                //category_idに自然数以外の値が入っている
+                return false;
             } else {
                 switch ($category_id) {
                     case 1000001 :
@@ -49,7 +50,8 @@ class Validate
                     case 1000010 :
                     break;
                     default :
-                        $error['category_id'] = '該当するcategory_idがありません';
+                        //該当するcategory_idが無い
+                        return false;
                     break;
                 }
             }
@@ -58,20 +60,23 @@ class Validate
         //price_max
         if (!empty($price_min)) {
             if (!$this->isNaturalNumber($price_min)) {
-                $error['price_min'] = 'price_minに自然数以外の値が入っています';
+                //price_minに自然数以外の値が入っている
+                return false;
             }
         }
 
         //price_min
         if (!empty($price_max)) {
             if (!$this->isNaturalNumber($price_max)) {
-                $error['price_max'] = 'price_maxに自然数以外の値が入っています';
+                //price_maxに自然数以外の値が入っている
+                return false;
             }
         }
 
         //price_minとprice_maxの大小関係
         if (!empty($price_min) && !empty($price_max) && $price_min > $price_max) {
-            $error['price'] = 'price_minがprice_maxより大きいです';
+            //price_minがprice_maxより大きい
+            return false;
         }
 
         //sort
@@ -83,25 +88,29 @@ class Validate
                 case 'price_asc' :
                 break;
                 default :
-                    $error['sort'] = 'sortの指定が正しくありません';
+                    //sortの指定が正しくない
+                    return false;
                 break;
             }
         }
 
         //count_per_pageとpage_number
         if ((empty($count_per_page) && !empty($page_number)) || (!empty($count_per_page) && empty($page_number))) {
-            $error['pagination'] = 'count_per_pageとpage_numberのどちらか一方のみがセットされています';
+            //count_per_pageとpage_numberのどちらか一方のみがセットされている
+            return false;
+
         } elseif (!empty($count_per_page) && !empty($page_number)) {
             if (!$this->isNaturalNumber($count_per_page)) {
-                $error['count_per_page'] = 'count_per_pageに自然数以外の値が入っています';
+                //count_per_pageに自然数以外の値が入っている
+                return false;
             }
             if (!$this->isNaturalNumber($page_number)) {
-                $error['page_number'] = 'page_numberに自然数以外の値が入っています';
+                //page_numberに自然数以外の値が入っている
+                return false;
             }
         }
 
-        return $error;
-
+        return true;
     }
 
     //値が自然数かどうかをチェックする
@@ -112,7 +121,6 @@ class Validate
         }
 
         return false;
-
     }
 
 

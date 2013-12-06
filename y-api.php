@@ -9,14 +9,14 @@ $response = array();
 
 $request_uri = $_SERVER['REQUEST_URI'];
 
-var_dump($request_uri);
+//var_dump($request_uri);
 
 $base_url = substr($request_uri, 10); // /y-api/v1/を切り出し
 
-var_dump($base_url);
+//var_dump($base_url);
 
 if ($base_url === false) { 
-    // /y-api/v1/の場合
+    // /y-api/v1/の場合 404
     echo '/y-api/v1/です';
     exit;
 } else {
@@ -29,14 +29,14 @@ if ($base_url === false) {
     }
 }
 
-var_dump($core_url);
+//var_dump($core_url);
 
 $pieces = explode(".", $core_url);
 $action = $pieces[0];
 $format = $pieces[1];
 
 if (count($pieces) != 2) {
-    //core_urlに含まれるドットが1つではない、エラー
+    //core_urlに含まれるドットが1つではない、エラー 404
     echo 'ドットが1つじゃないよ';
     exit;
 } elseif ($format == 'json') {
@@ -46,7 +46,7 @@ if (count($pieces) != 2) {
     //xml形式のフラグを設定
     $format_xml = 1;
 } else {
-    echo '.json（または.xml）直後がおかしい';
+    echo '.json（または.xml）以外の形式'; //404
     exit;
 }
 
@@ -54,26 +54,29 @@ switch ($action) {
 
     case 'SearchItems':
 
-        echo 'SearchItemsだよ';
+        echo 'SearchItemsだよ　';
 
         //GETじゃなかったら
         if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-            echo 'GET以外のメソッドです';
+            echo 'GET以外のメソッドです'; //405 Method Not Allowed
             exit;
         }
 
         $params = $_GET;
-var_dump($params);
-        //validate GET Parameters
-        //count_per_page, page_numberどちらかしかセットされていなかったらエラー
-        //エラーはtry〜catch?
+//var_dump($params);
 
+        //validate GET Parameters
+        //エラーはtry〜catch?
+        
         $val = new validate();
 
         $result = $val->validateGetParams($params);
 var_dump($result);
-exit;
 
+        if (!$result) {
+            echo 'GETのパラメーターが間違っている'; //400
+            exit;
+        }
 
         $search = new Search();
 
