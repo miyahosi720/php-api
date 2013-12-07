@@ -32,13 +32,14 @@ try {
     $action = $requested['action'];
     $format = $requested['format'];
 
+    $val = new validate();
+    $csv = new Csv();
+
     //APIの種類(action)ごとに処理を書く
     switch ($action) {
 
         case 'SearchItems':
-
             //GETパラメーターのバリデーション    
-            $val = new validate();
             $params = $val->validateSearchItemsParams($req_params);
 
             if ($params === false) {
@@ -47,7 +48,6 @@ try {
                 throw new BadRequestException('GETのパラメーターが間違っています');
             }
 
-            $csv = new Csv();
             //カテゴリID、価格範囲に合う商品データをCSVから取得
             $picked_items = $csv->pickUpRecordsByConditions($params['category_id'], $params['price_min'], $params['price_max']);
 
@@ -61,9 +61,7 @@ try {
         break;
 
         case 'LookUpItem':
-
             //GETパラメーターのバリデーション 
-            $val = new validate();
             $params = $val->validateLookUpItemParam($req_params);
 
             if ($params === false) {
@@ -72,7 +70,6 @@ try {
                 throw new BadRequestException('GETのパラメーターが間違っています');
             }
 
-            $csv = new Csv();
             //指定されたproduct_idに合う商品データをCSVから取得
             $picked_item = $csv->pickUpRecordById($params['product_id']);
 
@@ -85,7 +82,6 @@ try {
         break;
     }
 
-//var_dump($item);
     if (!is_array($item)) {
         //返り値が配列ではない
         //500 Internal Server Error
@@ -96,7 +92,11 @@ try {
 
     $response['item'] = $item;
     $response['item_count'] = $item_count;
-    $response['requested_url'] = 'http://' . $_SERVER['SERVER_NAME'] . $request_uri;
+    $response['requested'] = array(
+        'action' => $action,
+        'format' => $format,
+        'url' => 'http://' . $_SERVER['SERVER_NAME'] . $request_uri
+        );
     $response['timestamp'] = time();
 
 } catch (BadRequestException $e) {
@@ -132,7 +132,18 @@ try {
 //レスポンス出力
 if ($format == 'xml') {
     header("Content-Type: text/xml; charset=utf-8");
-    //ToDo: xml形式で出力する処理を書く
+    //ToDo: xml形式で出力する処理を正しく書く
+    print('<?xml version="1.0" encoding="UTF-8"?>
+<hoge>
+<block>
+<foo>aaa</foo>
+<bar>bbb</bar>
+</block>
+<block>
+<foo>aaa</foo>
+<bar>bbb</bar>
+</block>
+</hoge>');
 
 } else {
     header("Content-Type: application/json; charset=utf-8");
