@@ -13,7 +13,7 @@ class Csv
     }
 
     /*
-     * カテゴリID・価格範囲に合う商品レコードをCSVファイルからパースし配列で返す
+     * カテゴリID・価格範囲に合う商品レコードをCSVからパースし配列で返す
      */
     public function pickUpRecordsByConditions($selected_category_id = '', $price_min = '', $price_max = '')
     {
@@ -40,8 +40,6 @@ class Csv
         return $items;
     }
 
-    /*
-     */
     private function isPriceInRange($price, $price_min = '', $price_max = '')
     {
         if ((!empty($price_min) && (int)$price < (int)$price_min) || (!empty($price_max) && (int)$price_max < (int)$price)) {
@@ -51,8 +49,6 @@ class Csv
         return true;
     }
 
-    /*
-     */
     private function isCategoryMatched($category_id, $selected_category_id = '')
     {
         if (!empty($selected_category_id) && (int)$category_id != (int)$selected_category_id) {
@@ -126,6 +122,9 @@ class Csv
         return $items;
     }
 
+    /*
+     * 商品IDに合致する商品の情報をCSVから取得し、返す
+     */
     public function pickUpRecordById($selected_product_id)
     {
         $items = array();

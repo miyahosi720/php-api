@@ -123,7 +123,9 @@ class Validate
         return $params;
     }
 
-    //値が自然数かどうかをチェックする
+    /*
+     * 値が自然数かどうかをチェックする
+     */
     private function isNaturalNumber($string)
     {
         if (is_numeric($string) && 0 < (int)$string) {
