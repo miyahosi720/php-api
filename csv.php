@@ -1,6 +1,6 @@
 <?php
 
-class Search
+class Csv
 {
     protected $selected_category_id;
     protected $price_min;
@@ -10,9 +10,9 @@ class Search
     protected $page_number;
 
     /*
-     * CSVのデータのうち、条件に該当するレコードをパースして配列として返す
+     * CSVのデータのうち、カテゴリID、価格範囲に合う商品レコードをパースして配列として返す
      */
-    public function pickUpRecordsFromCsv($selected_category_id = '', $price_min = '', $price_max = '')
+    public function pickUpRecordsByConditions($selected_category_id = '', $price_min = '', $price_max = '')
     {
         $file = 'item.csv';
         $source = trim(file_get_contents($file));
@@ -39,11 +39,9 @@ class Search
         }
 
         return $items;
-
     }
 
     /*
-     * $priceが$price_min以上、$price_max以下ならばtrue, それ以外はfalseを返す
      */
     private function isPriceInRange($price, $price_min = '', $price_max = '')
     {
@@ -55,7 +53,6 @@ class Search
     }
 
     /*
-     * $category_idが$selected_category_idと一致していればtrue, それ以外はfalseを返す
      */
     private function isCategorySelected($category_id, $selected_category_id = '')
     {

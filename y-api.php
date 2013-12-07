@@ -1,12 +1,10 @@
 <?php
-require('search.php');
-require('validate.php');
 require('uri.php');
+require('validate.php');
+require('csv.php');
 
 $request_uri = $_SERVER['REQUEST_URI'];
-
-//var_dump($_SERVER['SERVER_NAME']);
-//var_dump($request_uri);
+var_dump($request_uri);
 
 $response = array();
 
@@ -43,7 +41,6 @@ try {
             $val = new validate();
             $params = $val->validateGetParams($req_params);
 
-
             if ($params === false) {
                 //GETのパラメーターが間違っている
                 //400 Bad Request
@@ -51,32 +48,22 @@ try {
             }
 
             //CSVから商品を検索
-            $search = new Search();
-            //カテゴリID、価格範囲に合うレコードを取得
-            $picked_items = $search->pickUpRecordsFromCsv($params['category_id'], $params['price_min'], $params['price_max']);
+            $csv = new Csv();
+            //カテゴリID、価格範囲に合う商品データを取得
+            $picked_items = $csv->pickUpRecordsByConditions($params['category_id'], $params['price_min'], $params['price_max']);
 
             //ソート
-            $sorted_items = $search->sort($picked_items, $params['sort']);
+            $sorted_items = $csv->sort($picked_items, $params['sort']);
 
             //ページネーション
-            $paginated_items = $search->pagination($sorted_items, $params['count_per_page'], $params['page_number']);
+            $paginated_items = $csv->pagination($sorted_items, $params['count_per_page'], $params['page_number']);
 
             $item = $paginated_items;
-//var_dump($item);
-            if (is_array($item)) {
-                $item_count = count($item);
-
-            } else {
-                //返り値が配列ではない
-                // 500 Internal Server Error
-                throw new InternalServerErrorException ('返り値が不正');
-            }
-
         break;
 
         case 'LookUpItem':
 
-//echo 'LookUpItemだよ';
+echo 'LookUpItemだよ';
 
         break;
 
@@ -84,7 +71,16 @@ try {
             //404 NOT FOUND
             throw new NotFoundException('そのようなAPIのアクションはありません');
         break;
-    } //switch終了
+    }
+
+    //var_dump($item);
+    if (!is_array($item)) {
+        //返り値が配列ではない
+        //500 Internal Server Error
+        throw new InternalServerErrorException ('商品データの返り値が不正');
+    }
+
+    $item_count = count($item);
 
     $response['item'] = $item;
     $response['item_count'] = $item_count;
