@@ -32,24 +32,6 @@ class Validate
         if (!empty($category_id)) {
             if (!$this->isNaturalNumber($category_id)) {
                 return false;
-            } else {
-                switch ($category_id) {
-                    case 1000001 :
-                    case 1000002 :
-                    case 1000003 :
-                    case 1000004 :
-                    case 1000005 :
-                    case 1000006 :
-                    case 1000007 :
-                    case 1000008 :
-                    case 1000009 :
-                    case 1000010 :
-                    break;
-                    default :
-                        //該当するcategory_idが無い
-                        return false;
-                    break;
-                }
             }
         }
 
