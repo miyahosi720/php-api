@@ -2,9 +2,9 @@
 require('uri.php');
 require('validate.php');
 require('csv.php');
+require('exceptions.php');
 
 $request_uri = $_SERVER['REQUEST_URI'];
-var_dump($request_uri);
 
 $response = array();
 
@@ -15,6 +15,8 @@ try {
         //405 Method Not Allowed
         throw new MethodNotAllowdException('GET以外のメソッドです');
     }
+
+    $req_params = $_GET;
 
     //"/y-api/v1/SearchItems.json" のようなURIについて、SearchItemsをaction, jsonをformatと呼ぶ。
     //REQUEST_URIの形式チェックを行うと同時に、action, formatの抽出を行う
@@ -35,11 +37,9 @@ try {
 
         case 'SearchItems':
 
-            $req_params = $_GET;
-
             //GETパラメーターのバリデーション    
             $val = new validate();
-            $params = $val->validateGetParams($req_params);
+            $params = $val->validateSearchItemsParams($req_params);
 
             if ($params === false) {
                 //GETのパラメーターが間違っている
@@ -47,9 +47,8 @@ try {
                 throw new BadRequestException('GETのパラメーターが間違っています');
             }
 
-            //CSVから商品を検索
             $csv = new Csv();
-            //カテゴリID、価格範囲に合う商品データを取得
+            //カテゴリID、価格範囲に合う商品データをCSVから取得
             $picked_items = $csv->pickUpRecordsByConditions($params['category_id'], $params['price_min'], $params['price_max']);
 
             //ソート
@@ -63,8 +62,21 @@ try {
 
         case 'LookUpItem':
 
-echo 'LookUpItemだよ';
+            //GETパラメーターのバリデーション 
+            $val = new validate();
+            $params = $val->validateLookUpItemParam($req_params);
 
+            if ($params === false) {
+                //GETのパラメーターが間違っている
+                //400 Bad Request
+                throw new BadRequestException('GETのパラメーターが間違っています');
+            }
+
+            $csv = new Csv();
+            //指定されたproduct_idに合う商品データをCSVから取得
+            $picked_item = $csv->pickUpRecordById($params['product_id']);
+
+            $item = $picked_item;
         break;
 
         default:
@@ -73,7 +85,7 @@ echo 'LookUpItemだよ';
         break;
     }
 
-    //var_dump($item);
+//var_dump($item);
     if (!is_array($item)) {
         //返り値が配列ではない
         //500 Internal Server Error
@@ -117,21 +129,11 @@ echo 'LookUpItemだよ';
         );
 }
 
-class NotFoundException extends Exception {}
-
-class MethodNotAllowdException extends Exception {}
-
-class BadRequestException extends Exception {}
-
-class InternalServerErrorException extends Exception {}
-
-//var_dump($response);
-//var_dump($format);
-
+//レスポンス出力
 if ($format == 'xml') {
     header("Content-Type: text/xml; charset=utf-8");
-    //xml形式で出力
-    echo 'aaa';
+    //ToDo: xml形式で出力する処理を書く
+
 } else {
     header("Content-Type: application/json; charset=utf-8");
     echo json_encode($response);

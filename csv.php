@@ -2,32 +2,31 @@
 
 class Csv
 {
-    protected $selected_category_id;
-    protected $price_min;
-    protected $price_max;
-    protected $sort;
-    protected $count_per_page;
-    protected $page_number;
+    protected $file = 'item.csv';
+    protected $records;
+
+    public function __construct()
+    {
+        $file = $this->file;
+        $source = trim(file_get_contents($file));
+        $this->records = explode("\n", $source);
+    }
 
     /*
-     * CSVのデータのうち、カテゴリID、価格範囲に合う商品レコードをパースして配列として返す
+     * カテゴリID・価格範囲に合う商品レコードをCSVファイルからパースし配列で返す
      */
     public function pickUpRecordsByConditions($selected_category_id = '', $price_min = '', $price_max = '')
     {
-        $file = 'item.csv';
-        $source = trim(file_get_contents($file));
-        $records = explode("\n", $source);
-
         $items = array();
 
-        foreach ($records as $record) {
+        foreach ($this->records as $record) {
             list($product_id, $category_id, $title, $price) = explode(",", $record);
 
-            $category_selected = $this->isCategorySelected($category_id, $selected_category_id);
+            $category_matched = $this->isCategoryMatched($category_id, $selected_category_id);
 
             $price_in_range = $this->isPriceInRange($price, $price_min, $price_max);
 
-            if ($price_in_range && $category_selected) {
+            if ($price_in_range && $category_matched) {
                 $item['product_id'] = $product_id;
                 $item['category_id'] = $category_id;
                 $item['title'] = $title;
@@ -54,7 +53,7 @@ class Csv
 
     /*
      */
-    private function isCategorySelected($category_id, $selected_category_id = '')
+    private function isCategoryMatched($category_id, $selected_category_id = '')
     {
         if (!empty($selected_category_id) && (int)$category_id != (int)$selected_category_id) {
             return false;
@@ -127,8 +126,36 @@ class Csv
         return $items;
     }
 
+    public function pickUpRecordById($selected_product_id)
+    {
+        $items = array();
 
+        foreach ($this->records as $record) {
+            list($product_id, $category_id, $title, $price) = explode(",", $record);
 
+            $product_id_matched = $this->isProductIdMatched($product_id, $selected_product_id);
 
+            if ($product_id_matched) {
+                $item['product_id'] = $product_id;
+                $item['category_id'] = $category_id;
+                $item['title'] = $title;
+                $item['price'] = $price;
+
+                $items[] = $item;
+                return $items;
+            }
+        }
+
+        return array();
+    }
+
+    private function isProductIdMatched($product_id, $selected_category_id)
+    {
+        if ((int)$product_id == (int)$selected_category_id) {
+            return true;
+        }
+
+        return false;
+    }
 
 }

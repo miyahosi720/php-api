@@ -2,7 +2,7 @@
 
 class Validate
 {
-    public function validateGetParams($req_params)
+    public function validateSearchItemsParams($req_params)
     {
         //不必要なパラメーターチェック
         foreach ($req_params as $key => $value) {
@@ -15,7 +15,7 @@ class Validate
                 case 'page_number':
                     break;
                 default :
-                    //不必要なパラメーターが入っている
+                    //規定外のパラメーターが存在
                     return false;
                     break;
             }
@@ -31,7 +31,6 @@ class Validate
         //category_id
         if (!empty($category_id)) {
             if (!$this->isNaturalNumber($category_id)) {
-                //category_idに自然数以外の値が入っている
                 return false;
             } else {
                 switch ($category_id) {
@@ -119,21 +118,37 @@ class Validate
         return $params;
     }
 
-    //値が自然数かどうかをチェックする
-    private function isNaturalNumber($param)
+    public function validateLookUpItemParam($req_params)
     {
-        if (is_numeric($param) && 0 < (int)$param) {
+        if (!isset($req_params['product_id']) || (!$this->isNaturalNumber($req_params['product_id']))) {
+            return false;
+        }
+
+        //不必要なパラメーターチェック
+        foreach ($req_params as $key => $value) {
+            switch ($key) {
+                case 'product_id' :
+                    break;
+                default :
+                    //規定外のパラメーターが存在
+                    return false;
+                    break;
+            }
+        }
+
+        $params['product_id'] = $req_params['product_id'];
+
+        return $params;
+    }
+
+    //値が自然数かどうかをチェックする
+    private function isNaturalNumber($string)
+    {
+        if (is_numeric($string) && 0 < (int)$string) {
             return true;
         }
 
         return false;
     }
-
-
-
-
-
-
-
 
 }
