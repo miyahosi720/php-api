@@ -12,7 +12,7 @@ CSVファイルに保存された商品データを取得するためのREST API
 ### リクエストURL
 
 |データ形式|リクエストURL|
-|-|-|
+|---|---|
 |json|/y-api/v1/SearchItems.json|
 |xml|/y-api/v1/SearchItems.xml|
 
@@ -63,7 +63,7 @@ http://php-api.miyahosi720.com/y-api/v1/SearchItems.json?category_id=1000004&pri
 ### リクエストURL
 
 |データ形式|リクエストURL|
-|-|-|
+|--|--|
 |json|/y-api/v1/LookUpItem.json|
 |xml|/y-api/v1/LookUpItem.xml|
 
