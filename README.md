@@ -42,32 +42,62 @@ HTTPメソッド：GET
 
 * count_per_pageとpage_numberは両方のセットが必要で、片方だけのセットはパラメーターのエラーになります。
 
+### レスポンス出力スキーマ
+
+#### リクエスト成功時
+
+* result
+    * requested
+        * action
+        * format
+        * parameter
+            * category_id
+            * price_min
+            * price_max
+            * sort
+            * count_per_page
+            * page_number
+        * url   
+        * timestamp
+    * item_count
+        * available
+        * returned
+    * item
+
+#### リクエスト失敗時
+
+* error 
+    * code
+    * message
+
 ### リクエストURL・レスポンス出力の例
 リクエストURL：
 
-
-    http://php-api.miyahosi720.com/y-api/v1/SearchItems.json?category_id=1000004&price_min=1000&price_max=8000&sort=price_desc&count_per_page=4&page_number=2
-
+```
+http://php-api.miyahosi720.com/y-api/v1/SearchItems.json?category_id=1000004&price_min=1000&price_max=8000&sort=price_desc&count_per_page=4&page_number=2
+```
 
 レスポンス出力：
 
 ```
-{"item":
+{"result":
+{"requested":
+{"action":"SearchItems",
+"format":"json",
+"parameter":{"category_id":"1000004","price_min":"1000","price_max":"8000","sort":"price_desc","count_per_page":"4","page_number":"2"},
+"url":"http:\/\/php-api.miyahosi720.com\/y-api\/v1\/SearchItems.json?category_id=1000004&price_min=1000&price_max=8000&sort=price_desc&count_per_page=4&page_number=2",
+"timestamp":1386670627},
+"items_count":{"available":8,"returned":4},
+"items":
 [{"product_id":"1069","category_id":"1000004","title":"\u5546\u54c1\u305d\u306e069","price":"5291"},
 {"product_id":"1057","category_id":"1000004","title":"\u5546\u54c1\u305d\u306e057","price":"4701"},
 {"product_id":"1020","category_id":"1000004","title":"\u5546\u54c1\u305d\u306e020","price":"3095"},
-{"product_id":"1011","category_id":"1000004","title":"\u5546\u54c1\u305d\u306e011","price":"2457"}],
-"item_count":4,
-"requested":
-{"action":"SearchItems",
-"format":"json",
-"url":"http:\/\/php-api.miyahosi720.com\/y-api\/v1\/SearchItems.json?category_id=1000004&price_min=1000&price_max=8000&sort=price_desc&count_per_page=4&page_number=2"},
-"timestamp":1386412005}
+{"product_id":"1011","category_id":"1000004","title":"\u5546\u54c1\u305d\u306e011","price":"2457"}]}}
 ```
 
 ### エラーコードおよびメッセージ
 
-エラーが起こった際は、errorパラメーターに下記のステータスコードとメッセージがセットされ出力されます。
+リクエストに失敗した場合は、errorパラメーターに下記のステータスコードとメッセージがセットされ出力されます。
 
 |ステータスコード|エラーメッセージ|状況
 |---|---|---|
@@ -99,6 +129,26 @@ HTTPメソッド：GET
 |---|---|---|---|
 |product_id|Integer|○|商品IDを指定。
 
+### レスポンス出力スキーマ
+
+#### リクエスト成功時
+
+* result
+    * requested
+        * action
+        * format
+        * parameter
+            * product_id
+        * url
+        * timestamp
+    * item
+
+#### リクエスト失敗時
+
+* error 
+    * code
+    * message
+
 ### リクエストURL・レスポンス出力の例
 リクエストURL：
 
@@ -109,13 +159,14 @@ http://php-api.miyahosi720.com/y-api/v1/LookUpItem.json?product_id=1007
 レスポンス出力：
 
 ```
-{"item":[{"product_id":"1007","category_id":"1000005","title":"\u5546\u54c1\u305d\u306e007","price":"4513"}],
-"item_count":1,
-"requested":
+{"result":
+{"requested":
 {"action":"LookUpItem",
 "format":"json",
-"url":"http:\/\/php-api.miyahosi720.com\/y-api\/v1\/LookUpItem.json?product_id=1007"},
-"timestamp":1386414649}
+"parameter":{"product_id":"1007"},
+"url":"http:\/\/php-api.miyahosi720.com\/y-api\/v1\/LookUpItem.json?product_id=1007",
+"timestamp":1386671932},
+"item":{"product_id":"1007","category_id":"1000005","title":"\u5546\u54c1\u305d\u306e007","price":"4513"}}}
 ```
 ### エラーコードおよびメッセージ
 

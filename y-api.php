@@ -73,7 +73,7 @@ try {
                         'format' => $format,
                         'parameter' => $req_params,
                         'url' => 'http://' . $_SERVER['SERVER_NAME'] . $request_uri,
-                        'time' => time()
+                        'timestamp' => time()
                     ),
                 'items_count' => array(
                         'available' => count($picked_items),
@@ -111,7 +111,7 @@ try {
                         'format' => $format,
                         'parameter' => $req_params,
                         'url' => 'http://' . $_SERVER['SERVER_NAME'] . $request_uri,
-                        'time' => time()
+                        'timestamp' => time()
                     ),
                 'item' => $item
                 );
