@@ -8,3 +8,6 @@ RewriteBase /
 RewriteRule y-api/v1/(.*) y-api.php
 
 ErrorDocument 404 /404.html
+
+# エラー表示
+php_flag display_errors On

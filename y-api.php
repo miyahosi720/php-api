@@ -1,12 +1,12 @@
 <?php
+//エラー表示
+error_reporting(E_ALL & ~E_NOTICE);
+
 require('uri.php');
-require('validate.php');
 require('csv.php');
 require('exceptions.php');
 
 $request_uri = $_SERVER['REQUEST_URI'];
-
-$response = array();
 
 try {
     //リクエストメソッドがGETかをチェック
@@ -32,15 +32,16 @@ try {
     $action = $requested['action'];
     $format = $requested['format'];
 
-    $val = new validate();
     $csv = new Csv();
+
+    $response = array();
 
     //APIの種類(action)ごとに処理を書く
     switch ($action) {
 
         case 'SearchItems':
             //GETパラメーターのバリデーション    
-            $params = $val->validateSearchItemsParams($req_params);
+            $params = $uri->validateSearchItemsParams($req_params);
 
             if ($params === false) {
                 //GETのパラメーターが間違っている
@@ -57,12 +58,34 @@ try {
             //ページネーション
             $paginated_items = $csv->pagination($sorted_items, $params['count_per_page'], $params['page_number']);
 
-            $item = $paginated_items;
+            $items = $paginated_items;
+
+            if (!is_array($items)) {
+                //返り値が配列ではない
+                //500 Internal Server Error
+                throw new Exception ('商品データの返り値が不正');
+            }
+
+            //出力するレスポンス内容をセット
+            $response['result'] = array(
+                'requested' => array(
+                        'action' => $action,
+                        'format' => $format,
+                        'parameter' => $req_params,
+                        'url' => 'http://' . $_SERVER['SERVER_NAME'] . $request_uri,
+                        'time' => time()
+                    ),
+                'items_count' => array(
+                        'available' => count($picked_items),
+                        'returned' => count($items)
+                    ),
+                'items' => $items
+                );
         break;
 
         case 'LookUpItem':
             //GETパラメーターのバリデーション 
-            $params = $val->validateLookUpItemParam($req_params);
+            $params = $uri->validateLookUpItemParam($req_params);
 
             if ($params === false) {
                 //GETのパラメーターが間違っている
@@ -73,7 +96,25 @@ try {
             //指定されたproduct_idに合う商品データをCSVから取得
             $picked_item = $csv->pickUpRecordById($params['product_id']);
 
-            $item = $picked_item;
+            if (!is_array($picked_item)) {
+                //返り値が配列ではない
+                //500 Internal Server Error
+                throw new Exception ('商品データの返り値が不正');
+            }
+
+            $item = isset($picked_item[0]) ? $picked_item[0] : array();
+
+            //出力するエラー内容をセット
+            $response['result'] = array(
+                'requested' => array(
+                        'action' => $action,
+                        'format' => $format,
+                        'parameter' => $req_params,
+                        'url' => 'http://' . $_SERVER['SERVER_NAME'] . $request_uri,
+                        'time' => time()
+                    ),
+                'item' => $item
+                );
         break;
 
         default:
@@ -81,23 +122,6 @@ try {
             throw new NotFoundException('そのようなAPIのアクションはありません');
         break;
     }
-
-    if (!is_array($item)) {
-        //返り値が配列ではない
-        //500 Internal Server Error
-        throw new InternalServerErrorException ('商品データの返り値が不正');
-    }
-
-    $item_count = count($item);
-
-    $response['item'] = $item;
-    $response['item_count'] = $item_count;
-    $response['requested'] = array(
-        'action' => $action,
-        'format' => $format,
-        'url' => 'http://' . $_SERVER['SERVER_NAME'] . $request_uri
-        );
-    $response['timestamp'] = time();
 
 } catch (BadRequestException $e) {
     //400 Bad Request
@@ -120,7 +144,7 @@ try {
             'code' => '405',
             'message' => 'Method Not Allowed'
         );
-} catch (InternalServerErrorException $e) {
+} catch (Exception $e) {
     // 500 Internal Server Error
     header("HTTP/1.1 500 Internal Server Error");
     $response['error'] = array(
@@ -131,24 +155,43 @@ try {
 
 //レスポンス出力
 if ($format == 'xml') {
-    header("Content-Type: text/xml; charset=utf-8");
-    //ToDo: xml形式で出力する処理を正しく書く
-    print('<?xml version="1.0" encoding="UTF-8"?>
-<hoge>
-<block>
-<foo>aaa</foo>
-<bar>bbb</bar>
-</block>
-<block>
-<foo>aaa</foo>
-<bar>bbb</bar>
-</block>
-</hoge>');
+    //xml形式で出力、PEARパッケージのXML_Serializer(http://pear.php.net/manual/ja/package.xml.xml-serializer.php)を使用
+    require_once("XML/Serializer.php"); 
+
+    if (isset($response['result'])) {
+        $options = array( 
+            XML_SERIALIZER_OPTION_INDENT => "\t", 
+            XML_SERIALIZER_OPTION_XML_ENCODING => 'UTF-8', 
+            XML_SERIALIZER_OPTION_XML_DECL_ENABLED => TRUE, 
+            XML_SERIALIZER_OPTION_ROOT_NAME => 'result', 
+            XML_SERIALIZER_OPTION_ROOT_ATTRIBS => array(), 
+            XML_SERIALIZER_OPTION_DEFAULT_TAG => 'item'
+        );
+
+        $serializer = new XML_Serializer($options); 
+        $serializer->serialize($response['result']); 
+        $xml = $serializer->getSerializedData(); 
+    
+    } elseif (isset($response['error'])) {
+        $options = array( 
+            XML_SERIALIZER_OPTION_INDENT => "\t", 
+            XML_SERIALIZER_OPTION_XML_ENCODING => 'UTF-8', 
+            XML_SERIALIZER_OPTION_XML_DECL_ENABLED => TRUE, 
+            XML_SERIALIZER_OPTION_ROOT_NAME => 'error', 
+            XML_SERIALIZER_OPTION_ROOT_ATTRIBS => array(),
+        );
+
+        $serializer = new XML_Serializer($options); 
+        $serializer->serialize($response['error']); 
+        $xml = $serializer->getSerializedData(); 
+    }
+
+    header("Content-Type: text/xml; charset=utf-8"); 
+    echo $xml;
 
 } else {
     header("Content-Type: application/json; charset=utf-8");
     echo json_encode($response);
 }
-
 
 ?>

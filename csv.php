@@ -80,15 +80,7 @@ class Csv
         }
 
         return $items;
-
     }
-
-    private function func_caller($name) {
-        if (function_exists($name)){
-            $name();
-        }
-    }
-
 
     private function price_desc($a, $b)
     {

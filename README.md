@@ -71,7 +71,7 @@ HTTPメソッド：GET
 
 |ステータスコード|エラーメッセージ|状況
 |---|---|---|
-|400|Bad Request|リクエストパラメーターのエラー
+|400|Bad Request|リクエストパラメーターの形式エラー
 |404|The URL You Requested Was Not Found|指定されたリソースが見つからない
 |405|Method Not Allowed|GET以外のHTTPメソッドを使用している
 |500|Server Error|システムエラー
@@ -97,7 +97,7 @@ HTTPメソッド：GET
 
 |パラメーター|型|必須|値|
 |---|---|---|---|
-|product_id|Integer|○|商品IDを指定。存在しない商品IDの指定は商品0件が返る。
+|product_id|Integer|○|商品IDを指定。
 
 ### リクエストURL・レスポンス出力の例
 リクエストURL：
