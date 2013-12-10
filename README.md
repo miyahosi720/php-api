@@ -62,7 +62,7 @@ HTTPメソッド：GET
     * item_count
         * available
         * returned
-    * item
+    * items
 
 #### リクエスト失敗時
 
@@ -141,7 +141,7 @@ HTTPメソッド：GET
             * product_id
         * url
         * timestamp
-    * items
+    * item
 
 #### リクエスト失敗時
 
