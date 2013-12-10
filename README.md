@@ -141,7 +141,7 @@ HTTPメソッド：GET
             * product_id
         * url
         * timestamp
-    * item
+    * items
 
 #### リクエスト失敗時
 
