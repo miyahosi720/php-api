@@ -37,8 +37,8 @@ HTTPメソッド：GET
 |price_min|Integer|-|価格の下限を指定。
 |price_max|Integer|-|価格の上限を指定。
 |sort|String|-|ソートの種別を指定。id_desc（IDを基準に降順）、id_asc（IDを基準に昇順）、price_desc（価格を基準に降順）、price_asc（価格を基準に昇順）のいずれかから選択。
-|count_per_page|Integer|△|ページ送り用。1ページに表示する商品数を指定。
-|page_number|Integer|△|ページ送り用。何ページ目を表示するかを指定。
+|count_per_page|Integer|-|ページ送り用。1ページに表示する商品数を指定。
+|page_number|Integer|-|ページ送り用。何ページ目を表示するかを指定。
 
 * count_per_pageとpage_numberは両方のセットが必要で、片方だけのセットはパラメーターのエラーになります。
 
