@@ -5,7 +5,8 @@
 
 RewriteEngine On
 RewriteBase /
-RewriteRule y-api/v1/(.*) y-api.php
+# RewriteRule api/v1/(.*) y-api.php/$1
+RewriteRule api/v1/(.*) api.php/$1
 
 ErrorDocument 404 /404.html
 
