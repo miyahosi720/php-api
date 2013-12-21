@@ -40,8 +40,8 @@ try {
                             'url' => 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
                             'timestamp' => time()
                         ),
-                    'items_count' => count($items),
-                    'items' => $items
+                    'item_count' => count($items),
+                    'item' => $items
                     );
 
                 $response = json_encode($response_array);
@@ -50,11 +50,33 @@ try {
         break;
 
         case '/item':
-            $response = $api_server->getItemDetail($_GET);
+            $item = $api_server->getItemDetail($_GET);
 
-            //正常レスポンス(json)を生成
+            if ($item === false) {
+                //GETパラメーターエラー
+                throw new BadRequestException('Keyword parameter is not valid');
+            }
+
+            $item_count = empty($item) ? 0 : 1;
 
             //正常レスポンス(xml)を生成
+            if ($_GET['format'] == 'xml') {
+                //正常レスポンス(xml)を生成
+                $response ="<result><piyo>howdy</piyo></result>";
+
+            } else {
+                //正常レスポンス(json)を生成
+                $response_array['result'] = array(
+                    'requested' => array(
+                            'parameter' => $_GET,
+                            'url' => 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
+                            'timestamp' => time()
+                        ),
+                    'item_count' => $item_count,
+                    'item' => $item
+                    );
+                $response = json_encode($response_array);
+            }
 
         break;
 

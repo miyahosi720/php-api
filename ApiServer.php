@@ -55,19 +55,33 @@ class ApiServer
 
         foreach ($request_params as $key => $value) {
             switch ($key) {
+                case 'format' :
                 case 'category_id' :
                 case 'price_min':
                 case 'price_max':
                 case 'sort':
                 case 'count_per_page':
                 case 'page_number':
-                case 'format' :
+
                     $params[$key] = $request_params[$key];
                     break;
                 default :
                     //規定外のパラメーターが存在
                     return false;
                     break;
+            }
+        }
+
+        //format
+        if (!empty($params['format'])) {
+            switch ($params['format']) {
+                case 'json' :
+                case 'xml' :
+                break;
+                default :
+                    //formatの指定が正しくない
+                    return false;
+                break;
             }
         }
 
@@ -234,8 +248,58 @@ class ApiServer
      */
     public function getItemDetail($request_params)
     {
+        $params = $this->validateLookUpItemParams($request_params);
 
+        if ($params === false) {
+            //GETパラメーターエラー
+            return false;
+        }
+
+        //指定されたproduct_idに合う商品詳細データをCSVから取得
+        $item = $this->pickUpRecordById($params['product_id']);
+
+        return $item;
     }
+
+    /*
+     * LookUpItemのGETパラメーターをチェックする
+     */
+    public function validateLookUpItemParams($request_params)
+    {
+        //format
+        if (!empty($request_params['format'])) {
+            switch ($request_params['format']) {
+                case 'json' :
+                case 'xml' :
+                break;
+                default :
+                    //formatの指定が正しくない
+                    return false;
+                break;
+            }
+        }
+
+        //product_id
+        if (!isset($request_params['product_id']) || (!$this->isNaturalNumber($request_params['product_id']))) {
+            return false;
+        }
+
+        //不必要なパラメーターチェック
+        foreach ($request_params as $key => $value) {
+            switch ($key) {
+                case 'format' :
+                case 'product_id' :
+                    break;
+                default :
+                    //規定外のパラメーターが存在
+                    return false;
+                    break;
+            }
+        }
+
+        return $request_params;
+    }
+
 
     /*
      * 商品IDに合致する商品の情報をCSVから取得し、返す
@@ -255,8 +319,7 @@ class ApiServer
                 $item['title'] = $title;
                 $item['price'] = $price;
 
-                $items[] = $item;
-                return $items;
+                return $item;
             }
         }
 
