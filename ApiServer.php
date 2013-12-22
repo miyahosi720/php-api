@@ -29,23 +29,7 @@ class ApiServer
 
         if ($params === false) {
             //GETパラメーターが不正、400エラー
-            header("HTTP/1.1 400 Bad Request");
-
-            if ($request_params['format'] == 'xml') {
-                //xmlの400エラーレスポンス生成
-                header("Content-Type: text/xml; charset=utf-8");
-                $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>400</code><message>The URL you requested was not found</message></error>";
-            } else {
-                //jsonの400エラーレスポンス生成
-                header("Content-Type: application/json; charset=utf-8");
-                $response_array['error'] = array(
-                        'code' => '400',
-                        'message' => 'The URL you requested was not found'
-                    );
-                $response = json_encode($response_array);
-            }
-
-            return $response;
+            return $this->render400Response($request_params['format']);
         }
 
         //カテゴリID、価格範囲に合う商品データをCSVから取得
@@ -67,10 +51,16 @@ class ApiServer
                 $xml = new SimpleXMLElement($root);
 
                 $requested_tag = $xml->addChild('requested');
+                $parameter_tag = $requested_tag->addChild('parameter');
 
                 foreach ($request_params as $key => $value) {
-                    $requested_tag->addChild($key, $value);
+                    $parameter_tag->addChild($key, $value);
                 }
+
+                $url_tag = $requested_tag->addChild('url');
+                $requested_tag->url = 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
+
+                $timestamp_tag = $requested_tag->addChild('timestamp', time());
 
                 $item_count_tag = $xml->addChild('item_count');
                 $item_count_tag->addChild('returned', count($items));
@@ -312,14 +302,63 @@ class ApiServer
         $params = $this->validateLookUpItemParams($request_params);
 
         if ($params === false) {
-            //GETパラメーターエラー
-            return false;
+            //GETパラメーターが不正、400エラー
+            return $this->render400Response($request_params['format']);
         }
 
         //指定されたproduct_idに合う商品詳細データをCSVから取得
         $item = $this->pickUpRecordById($params['product_id']);
 
-        return $item;
+        $item_hit = empty($item) ? 0 : 1;
+
+        if ($request_params['format'] == 'xml') {
+                //xmlのレスポンスを生成
+                header("Content-Type: text/xml; charset=utf-8");
+
+                $root = '<?xml version="1.0" encoding="UTF-8" ?><result></result>';
+                $xml = new SimpleXMLElement($root);
+
+                $requested_tag = $xml->addChild('requested');
+                $parameter_tag = $requested_tag->addChild('parameter');
+
+                foreach ($request_params as $key => $value) {
+                    $parameter_tag->addChild($key, $value);
+                }
+
+                $url_tag = $requested_tag->addChild('url');
+                $requested_tag->url = 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
+
+                $timestamp_tag = $requested_tag->addChild('timestamp', time());
+
+                $item_hit_tag = $xml->addChild('item_hit', $item_hit);
+
+                $item_tag = $xml->addChild('item');
+
+                if (!empty($item)) {
+                    $item_tag->addChild('product_id', $item['product_id']);
+                    $item_tag->addChild('category_id', $item['category_id']);
+                    $item_tag->addChild('title', $item['title']);
+                    $item_tag->addChild('price', $item['price']);
+                }
+
+                $response = $xml->asXML();
+
+            } else {
+                //jsonのレスポンスを生成
+                header("Content-Type: application/json; charset=utf-8");
+                $response_array['result'] = array(
+                    'requested' => array(
+                            'parameter' => $_GET,
+                            'url' => 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
+                            'timestamp' => time()
+                        ),
+                    'item_hit' => $item_hit,
+                    'item' => $item
+                    );
+                $response = json_encode($response_array);
+            }
+
+        return $response;
     }
 
     /*
@@ -396,15 +435,104 @@ class ApiServer
         return false;
     }
 
-    private function hello($params)
+    /*
+     * 400 Bad Requestのレスポンスを返す
+     */
+    public function render400Response($format)
     {
-        return $params;
+        header("HTTP/1.1 400 Bad Request");
+
+        if ($format == 'xml') {
+            //400エラーレスポンス(xml)
+            header("Content-Type: text/xml; charset=utf-8");
+            $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>400</code><message>Keyword parameter is not valid</message></error>";
+        } else {
+            //400エラーレスポンス(json) 
+            header("Content-Type: application/json; charset=utf-8");
+            $response_array['error'] = array(
+                'code' => '400',
+                'message' => 'Keyword parameter is not valid'
+            );
+            $response = json_encode($response_array);
+        }
+
+        return $response;
     }
 
-    public function world($params)
+    /*
+     * 404 Not Foundのレスポンスを返す
+     */
+    public function render404Response($format)
     {
-        echo '-----';
-        echo "world!\n";
+        header("HTTP/1.1 404 Not Found");
+
+        if ($format == 'xml') {
+            //404エラーレスポンス(xml)
+            header("Content-Type: text/xml; charset=utf-8");
+            $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>404</code><message>The url you requested was not found</message></error>";
+        } else {
+            //404エラーレスポンス(json) 
+            header("Content-Type: application/json; charset=utf-8");
+            $response_array['error'] = array(
+                'code' => '404',
+                'message' => 'The url you requested was not found'
+            );
+            $response = json_encode($response_array);
+        }
+
+        return $response;
+    }
+
+    /*
+     * 405 Method Not Allowdのレスポンスを返す
+     */
+    public function render405Response($format)
+    {
+        header("HTTP/1.1 405 Method Not Allowed");
+
+        if ($format == 'xml') {
+            //405エラーレスポンス(xml)
+            header("Content-Type: text/xml; charset=utf-8");
+            $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>405</code><message>Your HTTP method is not allowed</message></error>";
+        } else {
+            //405エラーレスポンス(json) 
+            header("Content-Type: application/json; charset=utf-8");
+            $response_array['error'] = array(
+                'code' => '405',
+                'message' => 'Your HTTP method is not allowed'
+            );
+            $response = json_encode($response_array);
+        }
+
+        return $response;
+    }
+
+    /*
+     * 500 Internal Server Errorのレスポンスを返す
+     */
+    public function render500Response($format)
+    {
+        header("HTTP/1.1 500 Internal Server Error");
+
+        if ($format == 'xml') {
+            //500エラーレスポンス(xml)
+            header("Content-Type: text/xml; charset=utf-8");
+            $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>500</code><message>Server Error</message></error>";
+        } else {
+            //500エラーレスポンス(json) 
+            header("Content-Type: application/json; charset=utf-8");
+            $response_array['error'] = array(
+                'code' => '500',
+                'message' => 'Server Error'
+            );
+            $response = json_encode($response_array);
+        }
+
+        return $response;
+    }
+
+    private function hello($params)
+    {
         return $params;
     }
 
