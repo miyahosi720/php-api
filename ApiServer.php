@@ -23,13 +23,29 @@ class ApiServer
         $this->records = explode("\n", $source);
     }
 
-    public function getItemsList($request_params)
+    public function searchItems($request_params)
     {
-        $params = $this->validateSearchItemsParams($request_params);
+        $params = $this->validateSearchParams($request_params);
 
         if ($params === false) {
-            //GETパラメーターエラー
-            return false;
+            //GETパラメーターが不正、400エラー
+            header("HTTP/1.1 400 Bad Request");
+
+            if ($request_params['format'] == 'xml') {
+                //xmlの400エラーレスポンス生成
+                header("Content-Type: text/xml; charset=utf-8");
+                $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>400</code><message>The URL you requested was not found</message></error>";
+            } else {
+                //jsonの400エラーレスポンス生成
+                header("Content-Type: application/json; charset=utf-8");
+                $response_array['error'] = array(
+                        'code' => '400',
+                        'message' => 'The URL you requested was not found'
+                    );
+                $response = json_encode($response_array);
+            }
+
+            return $response;
         }
 
         //カテゴリID、価格範囲に合う商品データをCSVから取得
@@ -43,13 +59,58 @@ class ApiServer
 
         $items = $paginated_items;
 
-        return $items;
+        if ($request_params['format'] == 'xml') {
+                //xmlのレスポンスを生成
+                header("Content-Type: text/xml; charset=utf-8");
+
+                $root = '<?xml version="1.0" encoding="UTF-8" ?><result></result>';
+                $xml = new SimpleXMLElement($root);
+
+                $requested_tag = $xml->addChild('requested');
+
+                foreach ($request_params as $key => $value) {
+                    $requested_tag->addChild($key, $value);
+                }
+
+                $item_count_tag = $xml->addChild('item_count');
+                $item_count_tag->addChild('returned', count($items));
+                $item_count_tag->addChild('available', count($picked_items));
+
+                foreach ($items as $item) {
+                    $item_tag = $xml->addChild('item');
+                    $item_tag->addChild('product_id', $item['product_id']);
+                    $item_tag->addChild('category_id', $item['category_id']);
+                    $item_tag->addChild('title', $item['title']);
+                    $item_tag->addChild('price', $item['price']);
+                }
+
+                $response = $xml->asXML();
+
+            } else {
+                //jsonのレスポンスを生成
+                header("Content-Type: application/json; charset=utf-8");
+                $response_array['result'] = array(
+                    'requested' => array(
+                            'parameter' => $_GET,
+                            'url' => 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
+                            'timestamp' => time()
+                        ),
+                    'item_count' => array(
+                            'returned' => count($items),
+                            'available' => count($picked_items)
+                        ),
+                    'item' => $items
+                    );
+                $response = json_encode($response_array);
+            }
+
+        return $response;
     }
 
     /*
      * SerchItemsのGETパラメーターをチェックする
      */
-    private function validateSearchItemsParams($request_params)
+    private function validateSearchParams($request_params)
     {
         $params = $this->params;
 
@@ -335,6 +396,16 @@ class ApiServer
         return false;
     }
 
+    private function hello($params)
+    {
+        return $params;
+    }
 
+    public function world($params)
+    {
+        echo '-----';
+        echo "world!\n";
+        return $params;
+    }
 
 }

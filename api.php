@@ -21,37 +21,14 @@ try {
     switch ($_SERVER['PATH_INFO']) {
 
         case '/items':
-            $items = $api_server->getItemsList($_GET);
-
-            if ($items === false) {
-                //GETパラメーターエラー
-                throw new BadRequestException('Keyword parameter is not valid');
-            }
-
-            if ($_GET['format'] == 'xml') {
-                //正常レスポンス(xml)を生成
-                $response ="<result><hoge>hello</hoge></result>";
-
-            } else {
-                //正常レスポンス(json)を生成
-                $response_array['result'] = array(
-                    'requested' => array(
-                            'parameter' => $_GET,
-                            'url' => 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
-                            'timestamp' => time()
-                        ),
-                    'item_count' => count($items),
-                    'item' => $items
-                    );
-
-                $response = json_encode($response_array);
-            }
+            $response = $api_server->searchItems($_GET);
 
         break;
 
         case '/item':
-            $item = $api_server->getItemDetail($_GET);
+            $response = $api_server->getItemDetail($_GET);
 
+            /*
             if ($item === false) {
                 //GETパラメーターエラー
                 throw new BadRequestException('Keyword parameter is not valid');
@@ -59,7 +36,6 @@ try {
 
             $item_count = empty($item) ? 0 : 1;
 
-            //正常レスポンス(xml)を生成
             if ($_GET['format'] == 'xml') {
                 //正常レスポンス(xml)を生成
                 $response ="<result><piyo>howdy</piyo></result>";
@@ -77,6 +53,7 @@ try {
                     );
                 $response = json_encode($response_array);
             }
+            */
 
         break;
 
@@ -86,54 +63,24 @@ try {
         break;
     }
 
-} catch (BadRequestException $e) {
-    //400 Bad Request
-    header("HTTP/1.1 400 Bad Request");
-    $response_array['error'] = array(
-        'code' => '400',
-        'message' => $e->getMessage()
-    );
-} catch (NotFoundException $e) {
-    //404 NOT FOUND
-    header("HTTP/1.1 404 Not Found");
-    $response_array['error'] = array(
-            'code' => '404',
-            'message' => $e->getMessage()
-        );
-} catch (MethodNotAllowdException $e) {
-    //405 Method Not Allowed
-    header("HTTP/1.1 405 Method Not Allowed");
-    $response_array['error'] = array(
-            'code' => '405',
-            'message' => $e->getMessage()
-        );
 } catch (Exception $e) {
+
     // 500 Internal Server Error
     header("HTTP/1.1 500 Internal Server Error");
-    $response_array['error'] = array(
+
+    if ($_GET['format'] == 'xml') {
+        //500エラーレスポンス(xml)
+        header("Content-Type: text/xml; charset=utf-8");
+        $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>500</code><message>Server Error</message></error>";
+    } else {
+        //500エラーレスポンス(json) 
+        header("Content-Type: application/json; charset=utf-8");
+        $response_array['error'] = array(
             'code' => '500',
             'message' => 'Server Error'
         );
-}
-
-if (isset($response_array['error'])) {
-    if ($_GET['format'] == 'xml') {
-        //エラーレスポンスxml
-        $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>". $response_array['error']['code'] ."</code><message>" . $response_array['error']['message'] . "</message></error>";
-    } else {
-        //エラーレスポンスjson
         $response = json_encode($response_array);
     }
-
-}
-
-if ($_GET['format'] == 'xml') {
-    //xmlヘッダセット
-    header("Content-Type: text/xml; charset=utf-8");
-
-} else {
-    //jsonヘッダセット
-    header("Content-Type: application/json; charset=utf-8");
 }
 
 echo $response;
