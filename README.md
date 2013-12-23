@@ -1,17 +1,8 @@
-# Y-API ver1.0 Documentation
+# Y-API Documentation ver 20131223
 
 CSVファイルに保存された商品データを取得するためのREST API
 
-## 商品データについて
-
-item.csvには、ランダムに作成した商品データが100件含まれています。
-
-それぞれのカラムの値や型は以下の通りです。
-
-* 商品ID : Integer（1001 〜 1100）
-* カテゴリID : Integer（1000001 〜 1000010）
-* 商品名 : String
-* 価格 : Integer
+![rirakkuma](http://www.san-x.co.jp/manage/archive/move_33.jpg)
 
 ## API一覧
 
@@ -127,7 +118,10 @@ http://php-api.miyahosi720.com/api/v1/items?format=xml&category_id=1000004&price
 エラー時のレスポンス出力の例：
 
 ```
-{"error":{"code":"404","message":"The url you requested was not found"}}
+<error>
+<code>400</code>
+<message>Requested parameter is not valid</message>
+</error>
 ```
 
 ## 2. 商品詳細API
@@ -182,4 +176,10 @@ http://php-api.miyahosi720.com/api/v1/item?format=json&product_id=1007
 "timestamp":1387766677},
 "item_hit":1,
 "item":{"product_id":"1007","category_id":"1000005","title":"\u5546\u54c1\u305d\u306e007","price":"4513"}}}
+```
+
+エラー時のレスポンス出力の例：
+
+```
+{"error":{"code":"404","message":"The url you requested was not found"}}
 ```
