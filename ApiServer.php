@@ -23,13 +23,13 @@ class ApiServer
         $this->records = explode("\n", $source);
     }
 
-    public function searchItems($request_params)
+    public function searchItems($request_params, $format = '')
     {
         $params = $this->validateSearchParams($request_params);
 
         if ($params === false) {
             //GETパラメーターが不正、400エラー
-            return $this->render400Response($request_params['format']);
+            return $this->render400Response($format);
         }
 
         //カテゴリID、価格範囲に合う商品データをCSVから取得
@@ -43,7 +43,7 @@ class ApiServer
 
         $items = $paginated_items;
 
-        if ($request_params['format'] == 'xml') {
+        if ($format == 'xml') {
                 //xmlのレスポンスを生成
                 header("Content-Type: text/xml; charset=utf-8");
 
@@ -297,13 +297,13 @@ class ApiServer
     /*
      * 商品詳細
      */
-    public function getItemDetail($request_params)
+    public function getItemDetail($request_params, $format = '')
     {
         $params = $this->validateLookUpItemParams($request_params);
 
         if ($params === false) {
             //GETパラメーターが不正、400エラー
-            return $this->render400Response($request_params['format']);
+            return $this->render400Response($format);
         }
 
         //指定されたproduct_idに合う商品詳細データをCSVから取得
@@ -311,7 +311,7 @@ class ApiServer
 
         $item_hit = empty($item) ? 0 : 1;
 
-        if ($request_params['format'] == 'xml') {
+        if ($format == 'xml') {
                 //xmlのレスポンスを生成
                 header("Content-Type: text/xml; charset=utf-8");
 
@@ -438,20 +438,20 @@ class ApiServer
     /*
      * 400 Bad Requestのレスポンスを返す
      */
-    public function render400Response($format)
+    public function render400Response($format = '')
     {
         header("HTTP/1.1 400 Bad Request");
 
         if ($format == 'xml') {
             //400エラーレスポンス(xml)
             header("Content-Type: text/xml; charset=utf-8");
-            $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>400</code><message>Keyword parameter is not valid</message></error>";
+            $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>400</code><message>Requested parameter is not valid</message></error>";
         } else {
             //400エラーレスポンス(json) 
             header("Content-Type: application/json; charset=utf-8");
             $response_array['error'] = array(
                 'code' => '400',
-                'message' => 'Keyword parameter is not valid'
+                'message' => 'Requested parameter is not valid'
             );
             $response = json_encode($response_array);
         }
@@ -462,7 +462,7 @@ class ApiServer
     /*
      * 404 Not Foundのレスポンスを返す
      */
-    public function render404Response($format)
+    public function render404Response($format = '')
     {
         header("HTTP/1.1 404 Not Found");
 
@@ -486,31 +486,23 @@ class ApiServer
     /*
      * 405 Method Not Allowdのレスポンスを返す
      */
-    public function render405Response($format)
+    public function render405Response()
     {
         header("HTTP/1.1 405 Method Not Allowed");
 
-        if ($format == 'xml') {
-            //405エラーレスポンス(xml)
-            header("Content-Type: text/xml; charset=utf-8");
-            $response ="<?xml version=\"1.0\" encoding=\"UTF-8\"?><error><code>405</code><message>Your HTTP method is not allowed</message></error>";
-        } else {
-            //405エラーレスポンス(json) 
-            header("Content-Type: application/json; charset=utf-8");
-            $response_array['error'] = array(
-                'code' => '405',
-                'message' => 'Your HTTP method is not allowed'
-            );
-            $response = json_encode($response_array);
-        }
-
-        return $response;
+        //405エラーレスポンス(json) 
+        header("Content-Type: application/json; charset=utf-8");
+        $response_array['error'] = array(
+            'code' => '405',
+            'message' => 'Your HTTP method is not allowed'
+        );
+        return json_encode($response_array);
     }
 
     /*
      * 500 Internal Server Errorのレスポンスを返す
      */
-    public function render500Response($format)
+    public function render500Response($format = '')
     {
         header("HTTP/1.1 500 Internal Server Error");
 
