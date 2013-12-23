@@ -57,9 +57,6 @@ class ApiServer
                     $parameter_tag->addChild($key, $value);
                 }
 
-                $url_tag = $requested_tag->addChild('url');
-                $requested_tag->url = 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
-
                 $timestamp_tag = $requested_tag->addChild('timestamp', time());
 
                 $item_count_tag = $xml->addChild('item_count');
@@ -82,7 +79,6 @@ class ApiServer
                 $response_array['result'] = array(
                     'requested' => array(
                             'parameter' => $_GET,
-                            'url' => 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
                             'timestamp' => time()
                         ),
                     'item_count' => array(
@@ -325,9 +321,6 @@ class ApiServer
                     $parameter_tag->addChild($key, $value);
                 }
 
-                $url_tag = $requested_tag->addChild('url');
-                $requested_tag->url = 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
-
                 $timestamp_tag = $requested_tag->addChild('timestamp', time());
 
                 $item_hit_tag = $xml->addChild('item_hit', $item_hit);
@@ -349,7 +342,6 @@ class ApiServer
                 $response_array['result'] = array(
                     'requested' => array(
                             'parameter' => $_GET,
-                            'url' => 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'],
                             'timestamp' => time()
                         ),
                     'item_hit' => $item_hit,

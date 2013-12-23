@@ -53,7 +53,6 @@ item.csvには、ランダムに作成した商品データが100件含まれて
             * sort
             * count_per_page
             * page_number
-        * url
         * timestamp
     * item_count
         * returned
@@ -65,6 +64,17 @@ item.csvには、ランダムに作成した商品データが100件含まれて
 * error 
     * code
     * message
+
+### エラーコードおよびメッセージ
+
+リクエストに失敗した場合は、errorパラメーターに下記のステータスコードとメッセージがセットされ出力されます。
+
+|ステータスコード|エラーメッセージ|状況
+|---|---|---|
+|400|Requested parameter is not valid|リクエストパラメーターの形式エラー
+|404|The url you requested was not found|指定されたリソースが見つからない
+|405|Your HTTP method is not allowed|GET以外のHTTPメソッドを使用している
+|500|Server Error|システムエラー
 
 ### リクエストURL・レスポンス出力の例
 リクエストURL：
@@ -87,10 +97,7 @@ http://php-api.miyahosi720.com/api/v1/items?format=xml&category_id=1000004&price
 <count_per_page>3</count_per_page>
 <page_number>2</page_number>
 </parameter>
-<url>
-http://php-api.miyahosi720.com/api/v1/items?format=xml&category_id=1000004&price_min=1000&price_max=8000&sort=%2Bprice&count_per_page=3&page_number=2
-</url>
-<timestamp>1387764669</timestamp>
+<timestamp>1387773773</timestamp>
 </requested>
 <item_count>
 <returned>3</returned>
@@ -116,17 +123,6 @@ http://php-api.miyahosi720.com/api/v1/items?format=xml&category_id=1000004&price
 </item>
 </result>
 ```
-
-### エラーコードおよびメッセージ
-
-リクエストに失敗した場合は、errorパラメーターに下記のステータスコードとメッセージがセットされ出力されます。
-
-|ステータスコード|エラーメッセージ|状況
-|---|---|---|
-|400|Requested parameter is not valid|リクエストパラメーターの形式エラー
-|404|The url you requested was not found|指定されたリソースが見つからない
-|405|Your HTTP method is not allowed|GET以外のHTTPメソッドを使用している
-|500|Server Error|システムエラー
 
 エラー時のレスポンス出力の例：
 
@@ -156,7 +152,6 @@ http://php-api.miyahosi720.com/api/v1/items?format=xml&category_id=1000004&price
         * parameter
             * format
             * product_id
-        * url
         * timestamp
     * item_hit 指定したIDの商品が存在した場合は1, 該当する商品が無い場合は0
     * item
@@ -166,6 +161,10 @@ http://php-api.miyahosi720.com/api/v1/items?format=xml&category_id=1000004&price
 * error 
     * code
     * message
+
+### エラーコードおよびメッセージ
+
+商品検索APIのエラーコードおよびメッセージと同じ。
 
 ### リクエストURL・レスポンス出力の例
 リクエストURL：
@@ -180,11 +179,7 @@ http://php-api.miyahosi720.com/api/v1/item?format=json&product_id=1007
 {"result":
 {"requested":
 {"parameter":{"format":"json","product_id":"1007"},
-"url":"http:\/\/php-api.miyahosi720.com\/api\/v1\/item?format=json&product_id=1007",
 "timestamp":1387766677},
 "item_hit":1,
 "item":{"product_id":"1007","category_id":"1000005","title":"\u5546\u54c1\u305d\u306e007","price":"4513"}}}
 ```
-### エラーコードおよびメッセージ
-
-商品検索APIのエラーコードおよびメッセージと同じ。
