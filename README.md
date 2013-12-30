@@ -1,6 +1,6 @@
 # Y-API Documentation ver 20131223
 
-CSVファイルに保存された商品データを取得するためのREST API
+CSVファイルに保存された商品データを取得するためのRESTful Web API
 
 ![rirakkuma](http://www.san-x.co.jp/manage/archive/move_33.jpg)
 
@@ -135,6 +135,7 @@ http://php-api.miyahosi720.com/api/v1/items?format=xml&category_id=1000004&price
 
 |パラメーター|型|必須|値|
 |---|---|---|---|
+|format|String|-|jsonもしくはxmlで指定。指定がない場合はjson形式で出力されます。
 |product_id|Integer|○|商品IDを指定。
 
 ### レスポンス出力スキーマ

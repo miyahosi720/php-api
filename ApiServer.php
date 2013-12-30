@@ -295,7 +295,7 @@ class ApiServer
      */
     public function getItemDetail($request_params, $format = '')
     {
-        $params = $this->validateLookUpItemParams($request_params);
+        $params = $this->validateItemDetailParams($request_params);
 
         if ($params === false) {
             //GETパラメーターが不正、400エラー
@@ -308,55 +308,55 @@ class ApiServer
         $item_hit = empty($item) ? 0 : 1;
 
         if ($format == 'xml') {
-                //xmlのレスポンスを生成
-                header("Content-Type: text/xml; charset=utf-8");
+            //xmlのレスポンスを生成
+            header("Content-Type: text/xml; charset=utf-8");
 
-                $root = '<?xml version="1.0" encoding="UTF-8" ?><result></result>';
-                $xml = new SimpleXMLElement($root);
+            $root = '<?xml version="1.0" encoding="UTF-8" ?><result></result>';
+            $xml = new SimpleXMLElement($root);
 
-                $requested_tag = $xml->addChild('requested');
-                $parameter_tag = $requested_tag->addChild('parameter');
+            $requested_tag = $xml->addChild('requested');
+            $parameter_tag = $requested_tag->addChild('parameter');
 
-                foreach ($request_params as $key => $value) {
-                    $parameter_tag->addChild($key, $value);
-                }
-
-                $timestamp_tag = $requested_tag->addChild('timestamp', time());
-
-                $item_hit_tag = $xml->addChild('item_hit', $item_hit);
-
-                $item_tag = $xml->addChild('item');
-
-                if (!empty($item)) {
-                    $item_tag->addChild('product_id', $item['product_id']);
-                    $item_tag->addChild('category_id', $item['category_id']);
-                    $item_tag->addChild('title', $item['title']);
-                    $item_tag->addChild('price', $item['price']);
-                }
-
-                $response = $xml->asXML();
-
-            } else {
-                //jsonのレスポンスを生成
-                header("Content-Type: application/json; charset=utf-8");
-                $response_array['result'] = array(
-                    'requested' => array(
-                            'parameter' => $_GET,
-                            'timestamp' => time()
-                        ),
-                    'item_hit' => $item_hit,
-                    'item' => $item
-                    );
-                $response = json_encode($response_array);
+            foreach ($request_params as $key => $value) {
+                $parameter_tag->addChild($key, $value);
             }
+
+            $timestamp_tag = $requested_tag->addChild('timestamp', time());
+
+            $item_hit_tag = $xml->addChild('item_hit', $item_hit);
+
+            $item_tag = $xml->addChild('item');
+
+            if (!empty($item)) {
+                $item_tag->addChild('product_id', $item['product_id']);
+                $item_tag->addChild('category_id', $item['category_id']);
+                $item_tag->addChild('title', $item['title']);
+                $item_tag->addChild('price', $item['price']);
+            }
+
+            $response = $xml->asXML();
+
+        } else {
+            //jsonのレスポンスを生成
+            header("Content-Type: application/json; charset=utf-8");
+            $response_array['result'] = array(
+                'requested' => array(
+                        'parameter' => $_GET,
+                        'timestamp' => time()
+                    ),
+                'item_hit' => $item_hit,
+                'item' => $item
+                );
+            $response = json_encode($response_array);
+        }
 
         return $response;
     }
 
     /*
-     * LookUpItemのGETパラメーターをチェックする
+     * itemDetailのGETパラメーターをチェックする
      */
-    public function validateLookUpItemParams($request_params)
+    public function validateItemDetailParams($request_params)
     {
         //format
         if (!empty($request_params['format'])) {

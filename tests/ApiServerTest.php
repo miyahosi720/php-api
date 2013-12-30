@@ -3,7 +3,7 @@ require_once (dirname(__FILE__) . "/../ApiServer.php");
 
 class ApiServerTest extends PHPUnit_Framework_TestCase
 {
-    public function testhello()
+    public function testHello()
     {
         $params = array(
             'a' => 1,
@@ -85,7 +85,7 @@ class ApiServerTest extends PHPUnit_Framework_TestCase
      * @dataProvider validParamProvider
      * @runInSeparateProcess
      */
-    public function testvalidParam($param, $format)
+    public function testValidParam($param, $format)
     {
         $method = new ReflectionMethod('ApiServer', 'searchItems');
 
@@ -119,10 +119,13 @@ class ApiServerTest extends PHPUnit_Framework_TestCase
     {
         return array(
                 array(array('format' => 'json'), 'json'),
+                array(array('category_id' => '1000003'), ''),
+                array(array('price_min' => '3000', 'price_max' => '5000'), ''),
                 array(array('sort' => '+id'), ''),
                 array(array('sort' => '-id'), ''),
                 array(array('sort' => '+price'), ''),
-                array(array('sort' => '-price'), '')
+                array(array('sort' => '-price'), ''),
+                array(array('count_per_page' => '5', 'page_number' => '2'), '')
             );
     }
 
