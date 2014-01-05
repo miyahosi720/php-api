@@ -154,11 +154,15 @@ class Item
      */
     private function fetchItemsFromDb($params)
     {
-        //SQL文をbuild
+        //SELECT文をbuild
 
         $placeholders = array();
 
         $where_array = array('TRUE');
+        $where_str = ''; //WHERE 部分
+        $order_str = ''; //ORDER BY 部分
+        $limit_str = ''; //LIMT 部分
+        $offset_str = ''; //OFFSET 部分
 
         if (!empty($params['category_id'])) {
             $where_array[] = 'category_id = :category_id';
@@ -193,8 +197,6 @@ class Item
                     break;
             }
 
-        } else {
-            $order_str = "";
         }
 
         if (!empty($params['count_per_page']) && !empty($params['page_number'])) {
@@ -204,10 +206,6 @@ class Item
 
             $offset_str = "OFFSET :offset_count";
             $placeholders[':offset_count'] = $params['count_per_page'] * ($params['page_number'] - 1);
-
-        } else {
-            $limit_str = "";
-            $offset_str = "";
         }
 
         $sql = "SELECT * FROM items WHERE {$where_str} {$order_str} {$limit_str} {$offset_str}";
