@@ -1,6 +1,6 @@
 <?php
 
-require '../app/models/item.php';
+require_once (dirname(__FILE__) . "/../models/item.php");
 
 class ItemsController
 {
@@ -30,7 +30,7 @@ class ItemsController
             $parameter = $response_array['result']['requested']['parameter'];
             $timestamp = $response_array['result']['requested']['timestamp'];
             $item_count = $response_array['result']['item_count'];
-            $item = $response_array['result']['item'];
+            $items = $response_array['result']['items'];
 
             if ($params['format'] == 'xml') {
                 require '../app/views/items/search.xml.php';

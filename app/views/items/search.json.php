@@ -10,6 +10,11 @@ header("Content-Type: application/json; charset=utf-8");
             "timestamp":<?php echo $timestamp; ?>,
             },
         "item_count":<?php echo $item_count; ?>,
-        "item":<?php echo json_encode($item) . "\n"; ?>
+        "item":
+            [
+<?php foreach ($items as $item) {
+    echo json_encode($item) . ',' . "\n";
+}?>
+            ]
         }
 }

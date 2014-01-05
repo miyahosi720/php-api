@@ -1,6 +1,6 @@
 <?php
 
-require '../app/core/dbmanager.php';
+require_once (dirname(__FILE__) . "/../core/dbmanager.php");
 
 class Item
 {
@@ -143,7 +143,7 @@ class Item
                     'timestamp' => time()
                 ),
             'item_count' => count($items),
-            'item' => $items
+            'items' => $items
             );
 
         return $response_array;
@@ -257,6 +257,11 @@ class Item
             'message' => 'Server Error'
         );
         return $response_array;
+    }
+
+    private function hello($params)
+    {
+        return $params;
     }
 
 }
