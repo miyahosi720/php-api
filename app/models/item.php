@@ -1,10 +1,9 @@
 <?php
 
+require '../app/core/dbmanager.php';
+
 class Item
 {
-    protected $file = '../data/item.csv';
-    protected $records;
-
     //デフォルトのパラメーター
     protected $params = array(
                 'format' => 'json',
@@ -16,25 +15,8 @@ class Item
                 'page_number' => ''
                 );
 
-    public function __construct()
-    {
-        $file = $this->file;
-        $source = trim(file_get_contents($file));
-        $this->records = explode("\n", $source);
-    }
-
-    public function hello()
-    {
-        return $this->records;
-    }
-
-    public function moe()
-    {
-        return 'item moe!';
-    }
-
     /*
-     * SerchItemsのGETパラメーターをチェックする
+     * 商品検索のGETパラメーターをチェックする
      */
     public function validateSearchParams($request_params)
     {
@@ -147,28 +129,20 @@ class Item
         return false;
     }
 
+    /*
+     * 出力する情報のセットを配列で返す
+     */
     public function createResultResponseArray($params)
     {
-        //カテゴリID、価格範囲に合う商品データをCSVから取得
-        $picked_items = $this->pickUpRecordsByConditions($params['category_id'], $params['price_min'], $params['price_max']);
 
-        //ソート
-        $sorted_items = $this->sort($picked_items, $params['sort']);
-
-        //ページネーション
-        $paginated_items = $this->pagination($sorted_items, $params['count_per_page'], $params['page_number']);
-
-        $items = $paginated_items;
+        $items = $this->fetchItemsFromDb($params);
 
         $response_array['result'] = array(
             'requested' => array(
                     'parameter' => $_GET,
                     'timestamp' => time()
                 ),
-            'item_count' => array(
-                    'returned' => count($items),
-                    'available' => count($picked_items)
-                ),
+            'item_count' => count($items),
             'item' => $items
             );
 
@@ -176,88 +150,79 @@ class Item
     }
 
     /*
-     * カテゴリID・価格範囲に合う商品レコードをCSVからパースし配列で返す
+     * GETパラメーターからSQL文をbuild, executeし商品情報を取得
      */
-    private function pickUpRecordsByConditions($selected_category_id = '', $price_min = '', $price_max = '')
+    private function fetchItemsFromDb($params)
     {
-        $items = array();
+        //SQL文をbuild
 
-        foreach ($this->records as $record) {
-            list($product_id, $category_id, $title, $price) = explode(",", $record);
+        $placeholders = array();
 
-            $category_matched = $this->isCategoryMatched($category_id, $selected_category_id);
+        $where_array = array('TRUE');
 
-            $price_in_range = $this->isPriceInRange($price, $price_min, $price_max);
+        if (!empty($params['category_id'])) {
+            $where_array[] = 'category_id = :category_id';
+            $placeholders[':category_id'] = $params['category_id'];
+        }
 
-            if ($price_in_range && $category_matched) {
-                $item['product_id'] = $product_id;
-                $item['category_id'] = $category_id;
-                $item['title'] = $title;
-                $item['price'] = $price;
+        if (!empty($params['price_min'])) {
+            $where_array[] = 'price >= :price_min';
+            $placeholders[':price_min'] = $params['price_min'];
+        }
 
-                $items[] = $item;
+        if (!empty($params['price_max'])) {
+            $where_array[] = 'price <= :price_max';
+            $placeholders[':price_max'] = $params['price_max'];
+        }
+
+        $where_str = implode(' AND ', $where_array);
+
+        if (!empty($params['sort'])) {
+            switch ($params['sort']) {
+                case '+id' :
+                    $order_str = "ORDER BY id ASC";
+                    break;
+                case '-id' :
+                    $order_str = "ORDER BY id DESC";
+                    break;
+                case '+price' :
+                    $order_str = "ORDER BY price ASC";
+                    break;
+                case '-price' :
+                    $order_str = "ORDER BY price DESC";
+                    break;
             }
 
+        } else {
+            $order_str = "";
         }
+
+        if (!empty($params['count_per_page']) && !empty($params['page_number'])) {
+
+            $limit_str = "LIMIT :limit_count";
+            $placeholders[':limit_count'] = $params['count_per_page'];
+
+            $offset_str = "OFFSET :offset_count";
+            $placeholders[':offset_count'] = $params['count_per_page'] * ($params['page_number'] - 1);
+
+        } else {
+            $limit_str = "";
+            $offset_str = "";
+        }
+
+        $sql = "SELECT * FROM items WHERE {$where_str} {$order_str} {$limit_str} {$offset_str}";
+
+        //DBでSELECT文を発行、商品情報を取得
+        $dbmanager = new DbManager();
+
+        $items = $dbmanager->fetchAll($sql, $placeholders);
 
         return $items;
     }
 
-    private function isCategoryMatched($category_id, $selected_category_id = '')
-    {
-        if (!empty($selected_category_id) && (int)$category_id != (int)$selected_category_id) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private function isPriceInRange($price, $price_min = '', $price_max = '')
-    {
-        if ((!empty($price_min) && (int)$price < (int)$price_min) || (!empty($price_max) && (int)$price_max < (int)$price)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function sort($items, $selected_sort = '')
-    {
-        if (!empty($selected_sort)) {
-
-            $compare = function($a, $b) use ($selected_sort) {
-                switch ($selected_sort) {
-                    case '+id' :
-                        return $a['product_id'] - $b['product_id'];
-                    case '-id' :
-                        return $b['product_id'] - $a['product_id'];
-                    case '+price' :
-                        return $a['price'] - $b['price'];
-                    case '-price' :
-                        return $b['price'] - $a['price'];
-                    default :
-                        return false;
-                }
-            };
-            usort($items, $compare);
-
-        }
-
-        return $items;
-    }
-
-    private function pagination($items, $count_per_page = '', $page_number = '')
-    {
-        if (!empty($count_per_page) && !empty($page_number)) {
-            $offset = $count_per_page * ($page_number - 1);
-            $limit = $count_per_page;
-
-            $items = array_slice($items, $offset, $limit);
-        }
-
-        return $items;
-    }
-
+    /*
+     * 400エラーの際に出力するコードとメッセージを設定
+     */
     public function create400ErrorResponseArray()
     {
         $response_array['error'] = array(
@@ -293,7 +258,5 @@ class Item
         );
         return $response_array;
     }
-
-
 
 }

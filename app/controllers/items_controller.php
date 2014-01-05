@@ -12,13 +12,11 @@ class ItemsController
     }
 
     /**
-     * GET /items
-     *
+     * 商品検索API /items
      */
     public function search($request_params)
     {
-
-        //パラメータのvalidation
+        //GETパラメータのvalidation
         $params = $this->_item->validateSearchParams($request_params);
 
         if ($params == false) {
@@ -31,8 +29,7 @@ class ItemsController
             //Viewに渡す変数を設定
             $parameter = $response_array['result']['requested']['parameter'];
             $timestamp = $response_array['result']['requested']['timestamp'];
-            $returned = $response_array['result']['item_count']['returned'];
-            $available = $response_array['result']['item_count']['available'];
+            $item_count = $response_array['result']['item_count'];
             $item = $response_array['result']['item'];
 
             if ($params['format'] == 'xml') {
@@ -94,13 +91,11 @@ class ItemsController
     }
 
     /**
-     * GET /items/#{id}
-     *
+     * 商品詳細API /item/#{id}
+     * 未着手。。。
      */
     public function lookup($params)
     {
-
-
-        require '../app/views/items/show.json.php';
+        require '../app/views/items/lookup.json.php';
     }
 }
