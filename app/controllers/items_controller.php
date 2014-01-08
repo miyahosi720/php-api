@@ -27,11 +27,12 @@ class ItemsController
             $response_array = $this->_item->createResultResponseArray($params);
 
             //Viewに渡す変数を設定
+            /*
             $parameter = $response_array['result']['requested']['parameter'];
             $timestamp = $response_array['result']['requested']['timestamp'];
             $item_count = $response_array['result']['item_count'];
             $items = $response_array['result']['items'];
-
+            */
             if ($params['format'] == 'xml') {
                 require '../app/views/items/search.xml.php';
             } else {

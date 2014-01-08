@@ -61,7 +61,7 @@ class Item
             }
         }
 
-        //price_max
+        //price_min
         if (!empty($params['price_min'])) {
             if (!$this->isNaturalNumber($params['price_min'])) {
                 //price_minに自然数以外の値が入っている
@@ -69,7 +69,7 @@ class Item
             }
         }
 
-        //price_min
+        //price_max
         if (!empty($params['price_max'])) {
             if (!$this->isNaturalNumber($params['price_max'])) {
                 //price_maxに自然数以外の値が入っている
@@ -134,7 +134,6 @@ class Item
      */
     public function createResultResponseArray($params)
     {
-
         $items = $this->fetchItemsFromDb($params);
 
         $response_array['result'] = array(
