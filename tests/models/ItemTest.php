@@ -1,5 +1,5 @@
 <?php
-require_once (dirname(__FILE__) . "/../app/models/item.php");
+require_once (dirname(__FILE__) . "/../../app/models/item.php");
 
 class ItemTest extends PHPUnit_Framework_TestCase
 {
