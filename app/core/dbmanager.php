@@ -14,6 +14,11 @@ class DbManager
     //PDOオブジェクト
     protected $dbh;
 
+    public function __construct()
+    {
+        $this->connect();
+    }
+
     private function connect()
     {
         $params = $this->params;
@@ -28,12 +33,14 @@ class DbManager
 
     public function execute($sql, $placeholders = array())
     {
-        $this->connect();
         $stmt = $this->dbh->prepare($sql);
 
-        //これをしないと、LIMIT, OFFSETのバインドが動作しない
         foreach ($placeholders as $key => $value) {
-            $stmt->bindValue($key, (int)$value, PDO::PARAM_INT);
+            if (is_numeric($value)) {
+                $stmt->bindValue($key, (int)$value, PDO::PARAM_INT); //これをしないと、LIMITのバインドが動作しない
+            } else {
+                $stmt->bindValue($key, $value, PDO::PARAM_STR);
+            }
         }
 
         $stmt->execute();
