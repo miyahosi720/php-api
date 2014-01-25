@@ -1,8 +1,8 @@
 <?php
 
-require_once (dirname(__FILE__) . "/../core/dbmanager.php");
+require_once (dirname(__FILE__) . "/aucfan_model.php");
 
-class Item
+class Item extends Aucfan_Model
 {
     //デフォルトのパラメーター
     protected $params = array(
@@ -210,9 +210,8 @@ class Item
         $sql = "SELECT * FROM items WHERE {$where_str} {$order_str} {$limit_str} {$offset_str}";
 
         //DBでSELECT文を発行、商品情報を取得
-        $dbmanager = new DbManager();
 
-        $items = $dbmanager->fetchAll($sql, $placeholders);
+        $items = $this->fetchAll($sql, $placeholders);
 
         return $items;
     }

@@ -1,8 +1,9 @@
 <?php
 
 require_once (dirname(__FILE__) . "/../models/item.php");
+require_once (dirname(__FILE__) . "/aucfan_controller.php");
 
-class ItemsController
+class ItemsController extends Aucfan_Controller
 {
     protected $_item;
 
