@@ -1,6 +1,6 @@
 <?php
 
-class Aucfan_Model
+class Base_Model
 {
     /*
      * DB接続情報
@@ -59,4 +59,44 @@ class Aucfan_Model
         //DB接続解除
         $this->dbh = null;
     }
+
+    /*
+     * 400エラーの際に出力するコードとメッセージを設定
+     */
+    public function create400ErrorResponseArray()
+    {
+        $response_array['error'] = array(
+            'code' => '400',
+            'message' => 'Requested parameter is not valid'
+            );
+        return $response_array;
+    }
+
+    public function create404ErrorResponseArray()
+    {
+        $response_array['error'] = array(
+            'code' => '404',
+            'message' => 'The url you requested was not found'
+            );
+        return $response_array;
+    }
+
+    public function create405ErrorResponseArray()
+    {
+        $response_array['error'] = array(
+            'code' => '405',
+            'message' => 'Your HTTP method is not allowed'
+        );
+        return $response_array;
+    }
+
+    public function create500ErrorResponseArray()
+    {
+        $response_array['error'] = array(
+            'code' => '500',
+            'message' => 'Server Error'
+        );
+        return $response_array;
+    }
+
 }

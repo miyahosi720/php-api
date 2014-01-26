@@ -1,8 +1,9 @@
 <?php
 
-require_once (dirname(__FILE__) . "/aucfan_model.php");
+require_once (dirname(__FILE__) . "/base_model.php");
+require_once (dirname(__FILE__) . "/category.php");
 
-class Item extends Aucfan_Model
+class Item extends Base_Model
 {
     //デフォルトのパラメーター
     protected $params = array(
@@ -120,7 +121,7 @@ class Item extends Aucfan_Model
     /*
      * 値が自然数かどうかをチェックする
      */
-    private function isNaturalNumber($string)
+    public function isNaturalNumber($string)
     {
         if (is_numeric($string) && 0 < (int)$string) {
             return true;
@@ -132,7 +133,7 @@ class Item extends Aucfan_Model
     /*
      * 出力する情報のセットを配列で返す
      */
-    public function createResultResponseArray($params)
+    public function getItemSearchResponseArray($params)
     {
         $items = $this->fetchItemsFromDb($params);
 
@@ -207,7 +208,7 @@ class Item extends Aucfan_Model
             $placeholders[':offset_count'] = $params['count_per_page'] * ($params['page_number'] - 1);
         }
 
-        $sql = "SELECT * FROM items WHERE {$where_str} {$order_str} {$limit_str} {$offset_str}";
+        $sql = "SELECT * FROM items3 WHERE {$where_str} {$order_str} {$limit_str} {$offset_str}";
 
         //DBでSELECT文を発行、商品情報を取得
 
@@ -216,44 +217,63 @@ class Item extends Aucfan_Model
         return $items;
     }
 
-    /*
-     * 400エラーの際に出力するコードとメッセージを設定
-     */
-    public function create400ErrorResponseArray()
+    public function getItemDetailResponseArray($id)
     {
-        $response_array['error'] = array(
-            'code' => '400',
-            'message' => 'Requested parameter is not valid'
+        $item_info = $this->getItemInfo($id);
+
+        $_category = new Category();
+        $category_info = $_category->getCategoryInfo($item_info['category_id']);
+
+        $parent_category_id = '';
+        $parent_category_name = '';
+
+        if (!empty($category_info['parent_id'])) {
+
+            $parent_category_info = $_category->getCategoryInfo($category_info['parent_id']);
+
+            $parent_category_id = $parent_category_info['id'];
+            $parent_category_name = $parent_category_info['name'];
+        }
+
+        $item = array(
+            'id' => $item_info['id'],
+            'category' => array(
+                'id' => $category_info['id'],
+                'name' => $category_info['name'],
+                'parent' => array(
+                    'id' => $parent_category_id,
+                    'name' => $parent_category_name),
+                ),
+            'title' => $item_info['title'],
+            'price' => $item_info['price'],
             );
-        return $response_array;
-    }
 
-    public function create404ErrorResponseArray()
-    {
-        $response_array['error'] = array(
-            'code' => '404',
-            'message' => 'The url you requested was not found'
+        $response_array['result'] = array(
+            'requested' => array(
+                    'id' => $id,
+                    'timestamp' => time()
+                ),
+            'item' => $item
             );
+
         return $response_array;
     }
 
-    public function create405ErrorResponseArray()
+    public function getItemInfo($id)
     {
-        $response_array['error'] = array(
-            'code' => '405',
-            'message' => 'Your HTTP method is not allowed'
-        );
-        return $response_array;
+        $sql = "SELECT * FROM items3 WHERE id = :id LIMIT 1";
+        $placeholders[':id'] = $id;
+
+        $item_record = $this->fetchAll($sql, $placeholders);
+
+        if (empty($item_record)) {
+            return array();
+        } else {
+            return $item_record[0];
+        }
+
     }
 
-    public function create500ErrorResponseArray()
-    {
-        $response_array['error'] = array(
-            'code' => '500',
-            'message' => 'Server Error'
-        );
-        return $response_array;
-    }
 
     private function hello($params)
     {

@@ -1,9 +1,9 @@
 <?php
 
 require_once (dirname(__FILE__) . "/../models/item.php");
-require_once (dirname(__FILE__) . "/aucfan_controller.php");
+require_once (dirname(__FILE__) . "/base_controller.php");
 
-class ItemsController extends Aucfan_Controller
+class ItemsController extends Base_Controller
 {
     protected $_item;
 
@@ -25,7 +25,7 @@ class ItemsController extends Aucfan_Controller
             $this->render400Page();
 
         } else {
-            $response_array = $this->_item->createResultResponseArray($params);
+            $response_array = $this->_item->getItemSearchResponseArray($params);
 
             //Viewに渡す変数を設定
             /*
@@ -44,60 +44,20 @@ class ItemsController extends Aucfan_Controller
 
     }
 
-    public function render400Page()
-    {
-        $response_array = $this->_item->create400ErrorResponseArray();
-
-        //Viewに渡す変数を設定
-        $error_code = $response_array['error']['code'];
-        $error_message = $response_array['error']['message'];
-
-        header("HTTP/1.1 400 Bad Request");
-        require '../app/views/items/error.json.php';
-    }
-
-    public function render404Page()
-    {
-        $response_array = $this->_item->create404ErrorResponseArray();
-
-        //Viewに渡す変数を設定
-        $error_code = $response_array['error']['code'];
-        $error_message = $response_array['error']['message'];
-
-        header("HTTP/1.1 404 Not Found");
-        require '../app/views/items/error.json.php';
-    }
-
-    public function render405Page()
-    {
-        $response_array = $this->_item->create405ErrorResponseArray();
-
-        //Viewに渡す変数を設定
-        $error_code = $response_array['error']['code'];
-        $error_message = $response_array['error']['message'];
-
-        header("HTTP/1.1 405 Method Not Allowed");
-        require '../app/views/items/error.json.php';
-    }
-
-    public function render500Page()
-    {
-        $response_array = $this->_item->create500ErrorResponseArray();
-
-        //Viewに渡す変数を設定
-        $error_code = $response_array['error']['code'];
-        $error_message = $response_array['error']['message'];
-
-        header("HTTP/1.1 405 Method Not Allowed");
-        require '../app/views/items/error.json.php';
-    }
-
     /**
      * 商品詳細API /item/#{id}
      * 未着手。。。
      */
-    public function lookup($params)
+    public function lookup($id)
     {
+
+        if (!$this->_item->isNaturalNumber($id)) {
+            //idが自然数でない、urlが不正
+            $this->render400Page();
+        }
+
+        $response_array = $this->_item->getItemDetailResponseArray($id);
+
         require '../app/views/items/lookup.json.php';
     }
 }
