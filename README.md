@@ -27,6 +27,15 @@ CSVファイルに保存された商品データを取得するためのRESTful 
         * timestamp
     * item_hit 指定したIDの商品が存在した場合は1, 該当する商品が無い場合は0
     * item
+        * id
+        * category
+            * id
+            * name
+            * parent
+                * id
+                * name
+        * title
+        * price
 
 #### リクエスト失敗時
 
