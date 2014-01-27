@@ -1,7 +1,19 @@
 <?php
 
+require_once (dirname(__FILE__) . "/../models/item.php");
+require_once (dirname(__FILE__) . "/../models/category.php");
+
 class Base_Controller
 {
+    protected $_item;
+    protected $_category;
+
+    public function __construct()
+    {
+        $this->_item = new Item();
+        $this->_category = new Category();
+    }
+
     public function render400Page()
     {
         $response_array = $this->_item->create400ErrorResponseArray();

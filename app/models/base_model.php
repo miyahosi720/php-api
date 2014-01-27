@@ -99,4 +99,16 @@ class Base_Model
         return $response_array;
     }
 
+    /*
+     * 値が自然数かどうかをチェックする
+     */
+    public function isNaturalNumber($string)
+    {
+        if (is_numeric($string) && 0 < (int)$string) {
+            return true;
+        }
+
+        return false;
+    }
+
 }

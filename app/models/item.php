@@ -119,18 +119,6 @@ class Item extends Base_Model
     }
 
     /*
-     * 値が自然数かどうかをチェックする
-     */
-    public function isNaturalNumber($string)
-    {
-        if (is_numeric($string) && 0 < (int)$string) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /*
      * 出力する情報のセットを配列で返す
      */
     public function getItemSearchResponseArray($params)
@@ -221,6 +209,19 @@ class Item extends Base_Model
     {
         $item_info = $this->getItemInfo($id);
 
+        if (empty($item_info)) {
+                $response_array['result'] = array(
+                'requested' => array(
+                        'id' => $id,
+                        'timestamp' => time()
+                    ),
+                'item_hit' => 0,
+                'item' => array(),
+            );
+
+            return $response_array;
+        }
+
         $_category = new Category();
         $category_info = $_category->getCategoryInfo($item_info['category_id']);
 
@@ -253,6 +254,7 @@ class Item extends Base_Model
                     'id' => $id,
                     'timestamp' => time()
                 ),
+            'item_hit' => 1,
             'item' => $item
             );
 
@@ -273,7 +275,6 @@ class Item extends Base_Model
         }
 
     }
-
 
     private function hello($params)
     {
