@@ -6,9 +6,9 @@ class Base_Model
      * DB接続情報
      */
     protected $db_config = array(
-        'dsn' => 'mysql:host=localhost;dbname=mydb',
-        'user' => 'myuser',
-        'password' => 'mypassword'
+        'dsn' => 'mysql:host=localhost;dbname=aucfan',
+        'user' => 'root',
+        'password' => 'naruhaya'
     );
 
     //PDOオブジェクト
