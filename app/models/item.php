@@ -16,8 +16,11 @@ class Item extends Base_Model
                 'page_number' => ''
                 );
 
-    /*
-     * 商品検索のGETパラメーターをチェックする
+    /**
+     * 商品検索のGETパラメーターのバリデーション
+     * @param array GETパラメーター
+     * @return mixed バリデーションでOKならばパラメータを返す、NGならばfalseを返す
+     * @author Yoshihiro Yanagawa
      */
     public function validateSearchParams($request_params)
     {
@@ -118,8 +121,10 @@ class Item extends Base_Model
         return $params;
     }
 
-    /*
-     * 出力する情報のセットを配列で返す
+    /**
+     * 商品検索で出力する情報のセットを配列で返す
+     * @param array $params リクエストパラメータ
+     * @return array 出力する情報の配列
      */
     public function getItemSearchResponseArray($params)
     {
@@ -137,8 +142,11 @@ class Item extends Base_Model
         return $response_array;
     }
 
-    /*
+    /**
      * GETパラメーターからSQL文をbuild, executeし商品情報を取得
+     * @param array $params リクエストパラメータ
+     * @return array DBから取得した内容
+     * @author Yoshihiro Yanagawa
      */
     private function fetchItemsFromDb($params)
     {
@@ -196,7 +204,7 @@ class Item extends Base_Model
             $placeholders[':offset_count'] = $params['count_per_page'] * ($params['page_number'] - 1);
         }
 
-        $sql = "SELECT * FROM items3 WHERE {$where_str} {$order_str} {$limit_str} {$offset_str}";
+        $sql = "SELECT * FROM items WHERE {$where_str} {$order_str} {$limit_str} {$offset_str}";
 
         //DBでSELECT文を発行、商品情報を取得
 
@@ -205,6 +213,11 @@ class Item extends Base_Model
         return $items;
     }
 
+    /**
+     * 商品詳細で出力する情報のセットを配列で返す
+     * @param int $id リクエスト商品ID
+     * @return array 出力する情報の配列
+     */
     public function getItemDetailResponseArray($id)
     {
         $item_info = $this->getItemInfo($id);
@@ -261,9 +274,15 @@ class Item extends Base_Model
         return $response_array;
     }
 
+    /**
+     * SQL文をbuild, executeし商品情報を取得
+     * @param int $id リクエスト商品ID
+     * @return array DBから取得した内容
+     * @author Yoshihiro Yanagawa
+     */
     public function getItemInfo($id)
     {
-        $sql = "SELECT * FROM items3 WHERE id = :id LIMIT 1";
+        $sql = "SELECT * FROM items WHERE id = :id LIMIT 1";
         $placeholders[':id'] = $id;
 
         $item_record = $this->fetchAll($sql, $placeholders);
@@ -276,6 +295,12 @@ class Item extends Base_Model
 
     }
 
+    /**
+     * PHPUnitテストの動作テスト用メソッド(笑)
+     * @param mixed なんでも
+     * @return mixed 右から左に受け流すお仕事
+     * @author Yoshihiro Yanagawa
+     */
     private function hello($params)
     {
         return $params;

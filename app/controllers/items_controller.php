@@ -6,6 +6,9 @@ class ItemsController extends Base_Controller
 {
     /**
      * 商品検索API /items
+     * GETパラメーターを元に検索を行い、結果の変数をViewに渡す
+     * @param array $request_params GETパラメータの配列
+     * @author Yoshihiro Yanagawa
      */
     public function searchItems($request_params)
     {
@@ -30,6 +33,9 @@ class ItemsController extends Base_Controller
 
     /**
      * 商品詳細API /item/#{id}
+     * IDを元に商品の情報を取得し、結果の変数をViewに渡す
+     * @param int $id リクエストされた商品ID
+     * @author Yoshihiro Yanagawa
      */
     public function lookUpItem($id)
     {

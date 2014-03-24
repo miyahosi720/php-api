@@ -4,6 +4,11 @@ require_once (dirname(__FILE__) . "/base_model.php");
 
 class Category extends Base_Model
 {
+    /**
+     * 全カテゴリの情報を取得
+     * @return array カテゴリ一覧APIで返す内容の配列
+     * @author Yoshihiro Yanagawa
+     */
     public function getCategoriesListResponseArray()
     {
         $all_categories = $this->getAllCategories();
@@ -34,6 +39,20 @@ class Category extends Base_Model
 
     }
 
+    /**
+     * 全カテゴリを取得するクエリの結果
+     * @return array 全カテゴリ情報
+     * @author Yoshihiro Yanagawa
+     */
+    public function getAllCategories()
+    {
+        $sql = "SELECT * FROM categories";
+
+        $all_categories = $this->fetchAll($sql);
+
+        return $all_categories;
+    }
+
     public function getCategoryInfo($id)
     {
         $sql = "SELECT * FROM categories WHERE id = :id LIMIT 1";
@@ -46,15 +65,6 @@ class Category extends Base_Model
         } else {
             return $result[0];
         }
-    }
-
-    public function getAllCategories()
-    {
-        $sql = "SELECT * FROM categories";
-
-        $all_categories = $this->fetchAll($sql);
-
-        return $all_categories;
     }
 
 }

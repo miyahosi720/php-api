@@ -1,4 +1,8 @@
 <?php
+/**
+ * MySQLに接続しクエリを投げて結果を取得するクラス。
+ * @ToDO:クラスの抽象化 
+ */
 
 class Base_Model
 {
@@ -60,8 +64,10 @@ class Base_Model
         $this->dbh = null;
     }
 
-    /*
-     * 400エラーの際に出力するコードとメッセージを設定
+    /**
+     * 400エラーの際に出力する内容を返す
+     * @return array 出力する内容(エラーコードとメッセージ)
+     * @author Yoshihiro Yanagawa
      */
     public function create400ErrorResponseArray()
     {
