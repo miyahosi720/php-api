@@ -1,8 +1,9 @@
 <?php
 
-require_once (dirname(__FILE__) . "/../core/dbmanager.php");
+require_once (dirname(__FILE__) . "/base_model.php");
+require_once (dirname(__FILE__) . "/category.php");
 
-class Item
+class Item extends Base_Model
 {
     //デフォルトのパラメーター
     protected $params = array(
@@ -15,8 +16,11 @@ class Item
                 'page_number' => ''
                 );
 
-    /*
-     * 商品検索のGETパラメーターをチェックする
+    /**
+     * 商品検索のGETパラメーターのバリデーション
+     * @param array GETパラメーター
+     * @return mixed バリデーションでOKならばパラメータを返す、NGならばfalseを返す
+     * @author Yoshihiro Yanagawa
      */
     public function validateSearchParams($request_params)
     {
@@ -117,22 +121,12 @@ class Item
         return $params;
     }
 
-    /*
-     * 値が自然数かどうかをチェックする
+    /**
+     * 商品検索で出力する情報のセットを配列で返す
+     * @param array $params リクエストパラメータ
+     * @return array 出力する情報の配列
      */
-    private function isNaturalNumber($string)
-    {
-        if (is_numeric($string) && 0 < (int)$string) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /*
-     * 出力する情報のセットを配列で返す
-     */
-    public function createResultResponseArray($params)
+    public function getItemSearchResponseArray($params)
     {
         $items = $this->fetchItemsFromDb($params);
 
@@ -148,8 +142,11 @@ class Item
         return $response_array;
     }
 
-    /*
+    /**
      * GETパラメーターからSQL文をbuild, executeし商品情報を取得
+     * @param array $params リクエストパラメータ
+     * @return array DBから取得した内容
+     * @author Yoshihiro Yanagawa
      */
     private function fetchItemsFromDb($params)
     {
@@ -210,52 +207,100 @@ class Item
         $sql = "SELECT * FROM items WHERE {$where_str} {$order_str} {$limit_str} {$offset_str}";
 
         //DBでSELECT文を発行、商品情報を取得
-        $dbmanager = new DbManager();
 
-        $items = $dbmanager->fetchAll($sql, $placeholders);
+        $items = $this->fetchAll($sql, $placeholders);
 
         return $items;
     }
 
-    /*
-     * 400エラーの際に出力するコードとメッセージを設定
+    /**
+     * 商品詳細で出力する情報のセットを配列で返す
+     * @param int $id リクエスト商品ID
+     * @return array 出力する情報の配列
      */
-    public function create400ErrorResponseArray()
+    public function getItemDetailResponseArray($id)
     {
-        $response_array['error'] = array(
-            'code' => '400',
-            'message' => 'Requested parameter is not valid'
+        $item_info = $this->getItemInfo($id);
+
+        if (empty($item_info)) {
+                $response_array['result'] = array(
+                'requested' => array(
+                        'id' => $id,
+                        'timestamp' => time()
+                    ),
+                'item_hit' => 0,
+                'item' => array(),
             );
-        return $response_array;
-    }
 
-    public function create404ErrorResponseArray()
-    {
-        $response_array['error'] = array(
-            'code' => '404',
-            'message' => 'The url you requested was not found'
+            return $response_array;
+        }
+
+        $_category = new Category();
+        $category_info = $_category->getCategoryInfo($item_info['category_id']);
+
+        $parent_category_id = '';
+        $parent_category_name = '';
+
+        if (!empty($category_info['parent_id'])) {
+
+            $parent_category_info = $_category->getCategoryInfo($category_info['parent_id']);
+
+            $parent_category_id = $parent_category_info['id'];
+            $parent_category_name = $parent_category_info['name'];
+        }
+
+        $item = array(
+            'id' => $item_info['id'],
+            'category' => array(
+                'id' => $category_info['id'],
+                'name' => $category_info['name'],
+                'parent' => array(
+                    'id' => $parent_category_id,
+                    'name' => $parent_category_name),
+                ),
+            'title' => $item_info['title'],
+            'price' => $item_info['price'],
             );
+
+        $response_array['result'] = array(
+            'requested' => array(
+                    'id' => $id,
+                    'timestamp' => time()
+                ),
+            'item_hit' => 1,
+            'item' => $item
+            );
+
         return $response_array;
     }
 
-    public function create405ErrorResponseArray()
+    /**
+     * SQL文をbuild, executeし商品情報を取得
+     * @param int $id リクエスト商品ID
+     * @return array DBから取得した内容
+     * @author Yoshihiro Yanagawa
+     */
+    public function getItemInfo($id)
     {
-        $response_array['error'] = array(
-            'code' => '405',
-            'message' => 'Your HTTP method is not allowed'
-        );
-        return $response_array;
+        $sql = "SELECT * FROM items WHERE id = :id LIMIT 1";
+        $placeholders[':id'] = $id;
+
+        $item_record = $this->fetchAll($sql, $placeholders);
+
+        if (empty($item_record)) {
+            return array();
+        } else {
+            return $item_record[0];
+        }
+
     }
 
-    public function create500ErrorResponseArray()
-    {
-        $response_array['error'] = array(
-            'code' => '500',
-            'message' => 'Server Error'
-        );
-        return $response_array;
-    }
-
+    /**
+     * PHPUnitテストの動作テスト用メソッド(笑)
+     * @param mixed なんでも
+     * @return mixed 右から左に受け流すお仕事
+     * @author Yoshihiro Yanagawa
+     */
     private function hello($params)
     {
         return $params;
