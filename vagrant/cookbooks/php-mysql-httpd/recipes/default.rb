@@ -38,3 +38,12 @@ service "mysqld" do
   action [:start, :enable]
 end
 
+
+%w{php-pecl-memcache memcached}.each do |name|
+  package name do
+    action :install
+  end
+end
+service "memcached" do
+  action [:start, :enable]
+end
