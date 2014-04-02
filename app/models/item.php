@@ -20,7 +20,7 @@ class Item extends Base_Model
      * 商品検索のGETパラメーターのバリデーション
      * @param array GETパラメーター
      * @return mixed バリデーションでOKならばパラメータを返す、NGならばfalseを返す
-     * @author Yoshihiro Yanagawa
+     * @author miyahosi720
      */
     public function validateSearchParams($request_params)
     {
@@ -146,7 +146,7 @@ class Item extends Base_Model
      * GETパラメーターからSQL文をbuild, executeし商品情報を取得
      * @param array $params リクエストパラメータ
      * @return array DBから取得した内容
-     * @author Yoshihiro Yanagawa
+     * @author miyahosi720
      */
     private function fetchItemsFromDb($params)
     {
@@ -278,7 +278,7 @@ class Item extends Base_Model
      * SQL文をbuild, executeし商品情報を取得
      * @param int $id リクエスト商品ID
      * @return array DBから取得した内容
-     * @author Yoshihiro Yanagawa
+     * @author miyahosi720
      */
     public function getItemInfo($id)
     {
@@ -299,7 +299,7 @@ class Item extends Base_Model
      * PHPUnitテストの動作テスト用メソッド(笑)
      * @param mixed なんでも
      * @return mixed 右から左に受け流すお仕事
-     * @author Yoshihiro Yanagawa
+     * @author miyahosi720
      */
     private function hello($params)
     {

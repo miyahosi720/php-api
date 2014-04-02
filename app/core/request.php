@@ -7,7 +7,7 @@ class Request
     /**
      * リクエストメソッドがGETかどうかを判別する
      * @return boolean GETならtrue,それ以外はfalse
-     * @author Yoshihiro Yanagawa
+     * @author miyaosi720
      */
     public function isGet()
     {
@@ -22,7 +22,7 @@ class Request
      * PATH_INFOを / の区切りごとに分解し配列で返す
      * @param string $path_info
      * @return array PATH_INFOを/の区切りで分解したもの
-     * @author Yoshihiro Yanagawa
+     * @author miyaosi720
      */
     public function resolvePathInfo($path_info)
     {

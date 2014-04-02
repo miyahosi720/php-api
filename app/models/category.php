@@ -7,7 +7,7 @@ class Category extends Base_Model
     /**
      * 全カテゴリの情報を取得
      * @return array カテゴリ一覧APIで返す内容の配列
-     * @author Yoshihiro Yanagawa
+     * @author miyahosi720
      */
     public function getCategoriesListResponseArray()
     {
@@ -42,7 +42,7 @@ class Category extends Base_Model
     /**
      * 全カテゴリを取得するクエリの結果
      * @return array 全カテゴリ情報
-     * @author Yoshihiro Yanagawa
+     * @author miyahosi720
      */
     public function getAllCategories()
     {

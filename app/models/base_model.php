@@ -10,9 +10,9 @@ class Base_Model
      * DB接続情報
      */
     protected $db_config = array(
-        'dsn' => 'mysql:host=localhost;dbname=aucfan',
+        'dsn' => 'mysql:host=localhost;dbname=apidb',
         'user' => 'root',
-        'password' => 'naruhaya'
+        'password' => ''
     );
 
     //PDOオブジェクト
@@ -67,7 +67,7 @@ class Base_Model
     /**
      * 400エラーの際に出力する内容を返す
      * @return array 出力する内容(エラーコードとメッセージ)
-     * @author Yoshihiro Yanagawa
+     * @author miyahosi720
      */
     public function create400ErrorResponseArray()
     {
