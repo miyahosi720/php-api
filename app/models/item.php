@@ -208,7 +208,7 @@ class Item extends Base_Model
 
         //DBでSELECT文を発行、商品情報を取得
 
-        $items = $this->fetchAll($sql, $placeholders);
+        $items = $this->db->fetchAll($sql, $placeholders);
 
         return $items;
     }
@@ -285,7 +285,7 @@ class Item extends Base_Model
         $sql = "SELECT * FROM items WHERE id = :id LIMIT 1";
         $placeholders[':id'] = $id;
 
-        $item_record = $this->fetchAll($sql, $placeholders);
+        $item_record = $this->db->fetchAll($sql, $placeholders);
 
         if (empty($item_record)) {
             return array();
