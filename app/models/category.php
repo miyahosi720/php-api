@@ -50,8 +50,9 @@ class Category extends Base_Model
         $key = md5($sql);
 
         $all_categories = $this->memcache->get($key);
+
         if (! $all_categories) {
-            $all_categories = $this->fetchAll($sql);
+            $all_categories = $this->db->fetchAll($sql);
             $this->memcache->set($key, $all_categories);
         }
 
@@ -63,7 +64,7 @@ class Category extends Base_Model
         $sql = "SELECT * FROM categories WHERE id = :id LIMIT 1";
         $placeholders[':id'] = $id;
 
-        $result = $this->fetchAll($sql, $placeholders);
+        $result = $this->db->fetchAll($sql, $placeholders);
 
         if (empty($result)) {
             return array();
