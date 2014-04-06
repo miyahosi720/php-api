@@ -47,3 +47,6 @@ end
 service "memcached" do
   action [:start, :enable]
 end
+service "httpd" do
+  action :restart
+end
