@@ -18,9 +18,16 @@ class Base_Model
     //PDOオブジェクト
     protected $dbh;
 
+
+    protected $memcache;
+
+
     public function __construct()
     {
         $this->connect();
+
+        $this->memcache = new Memcache;
+        $this->memcache->addServer('localhost', 11211);
     }
 
     private function connect()
