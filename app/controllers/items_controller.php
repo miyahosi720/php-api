@@ -22,11 +22,12 @@ class ItemsController extends Base_Controller
         } else {
             $response_array = $this->_item->getItemSearchResponseArray($params);
 
-            if ($params['format'] == 'xml') {
-                require '../app/views/items/search.xml.php';
-            } else {
-                require '../app/views/items/search.json.php';
-            }
+            //@ToDo: クラスを呼んで配列をjsonやxmlにConvert
+            //@ToDo: json形式しか書いてないので、xml変換も書く
+            $data['response'] = json_encode($response_array);
+
+            View::render('items/search', $data);
+
         }
 
     }

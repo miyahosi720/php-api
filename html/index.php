@@ -6,6 +6,7 @@ if (!isset($_SERVER['PATH_INFO'])) {
 }
 
 require '../app/core/request.php';
+require '../app/core/view.php';
 require '../app/controllers/items_controller.php';
 require '../app/controllers/categories_controller.php';
 

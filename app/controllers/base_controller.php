@@ -2,6 +2,7 @@
 
 require_once (dirname(__FILE__) . "/../models/item.php");
 require_once (dirname(__FILE__) . "/../models/category.php");
+require_once (dirname(__FILE__) . "/../core/controllers/rest_controller.php");
 
 class Base_Controller
 {
